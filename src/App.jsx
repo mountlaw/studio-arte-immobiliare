@@ -188,8 +188,7 @@ const INITIAL_PROPERTIES = [
 ];
 
 const INITIAL_USERS = [
-  { id: 1, nome: "Admin", email: "admin@studioarteimmobiliare.com", ruolo: "admin", password: "admin123" },
-  { id: 2, nome: "Agente Demo", email: "agente@studioarteimmobiliare.com", ruolo: "agente", password: "agente123" },
+  { id: 1, nome: "Andrea", email: "andrea.edmusic@gmail.com", ruolo: "admin", password: "StudioArte2024!" },
 ];
 
 // --- UTILITY ---
@@ -280,16 +279,16 @@ const colors = {
 
 const styles = {
   // Global
-  page: { fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif", color: colors.text, background: colors.bg, minHeight: "100vh" },
+  page: { fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", color: colors.text, background: colors.bg, minHeight: "100vh" },
 
   // Navbar
   navbar: { background: colors.primary, padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 72, position: "sticky", top: 0, zIndex: 100, boxShadow: "0 2px 8px rgba(0,0,0,0.15)" },
   navLogo: { color: colors.accent, fontSize: 20, fontWeight: 700, letterSpacing: 1, cursor: "pointer", textDecoration: "none" },
   navLogoSub: { color: colors.white, fontSize: 11, letterSpacing: 2, display: "block", opacity: 0.8, fontWeight: 400 },
   navLinks: { display: "flex", gap: 8, alignItems: "center" },
-  navLink: { color: colors.white, textDecoration: "none", padding: "8px 16px", borderRadius: 6, fontSize: 14, cursor: "pointer", transition: "background 0.2s", background: "transparent", border: "none", fontFamily: "inherit" },
+  navLink: { color: colors.white, textDecoration: "none", padding: "8px 16px", borderRadius: 6, fontSize: 14, cursor: "pointer", transition: "background 0.2s", background: "transparent", border: "none", fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", letterSpacing: 0.2 },
   navLinkActive: { background: "rgba(200,169,126,0.2)", color: colors.accent },
-  navCTA: { background: colors.accent, color: colors.primary, padding: "8px 20px", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", border: "none", fontFamily: "inherit" },
+  navCTA: { background: colors.accent, color: colors.primary, padding: "8px 20px", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", border: "none", fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif" },
   mobileMenuBtn: { display: "none", background: "none", border: "none", color: colors.white, cursor: "pointer", padding: 4 },
 
   // Hero
@@ -456,26 +455,52 @@ function Navbar({ page, setPage, setShowMobileMenu, showMobileMenu, isMobile }) 
 
 function MobileMenu({ page, setPage, onClose }) {
   return (
-    <div style={{ ...styles.mobileNav, display: "flex" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 20, background: "none", border: "none", color: "#fff", cursor: "pointer" }}>
+    <div style={{ ...styles.mobileNav, display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <button onClick={onClose} style={{ position: "absolute", top: 24, right: 24, background: "none", border: "none", color: "#fff", cursor: "pointer", padding: 8 }}>
         <IconX />
       </button>
-      {[
-        { name: "home", label: "Home" },
-        { name: "vendite", label: "Vendite" },
-        { name: "affitti", label: "Affitti" },
-        { name: "chi-siamo", label: "Chi Siamo" },
-        { name: "valutazione", label: "Valuta Casa" },
-        { name: "contatti", label: "Contatti" },
-      ].map((item) => (
-        <button
-          key={item.name}
-          style={{ ...styles.navLink, display: "block", fontSize: 18, padding: "14px 0", ...(page.name === item.name ? { color: colors.accent } : {}) }}
-          onClick={() => { setPage({ name: item.name }); onClose(); }}
-        >
-          {item.label}
-        </button>
-      ))}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, width: "100%" }}>
+        <div style={{ marginBottom: 24 }}>
+          <NavLogo size={50} />
+        </div>
+        {[
+          { name: "home", label: "Home" },
+          { name: "vendite", label: "Vendite" },
+          { name: "affitti", label: "Affitti" },
+          { name: "chi-siamo", label: "Chi Siamo" },
+          { name: "valutazione", label: "Valuta Casa" },
+          { name: "contatti", label: "Contatti" },
+        ].map((item) => (
+          <button
+            key={item.name}
+            style={{
+              color: page.name === item.name ? colors.accent : colors.white,
+              textDecoration: "none",
+              padding: "16px 32px",
+              fontSize: 22,
+              fontWeight: page.name === item.name ? 600 : 400,
+              cursor: "pointer",
+              transition: "all 0.2s",
+              background: page.name === item.name ? "rgba(201,165,76,0.1)" : "transparent",
+              border: "none",
+              borderRadius: 10,
+              fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif",
+              letterSpacing: 1,
+              width: "100%",
+              maxWidth: 280,
+              textAlign: "center",
+            }}
+            onClick={() => { setPage({ name: item.name }); onClose(); }}
+          >
+            {item.label}
+          </button>
+        ))}
+        <div style={{ marginTop: 32, textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: 13 }}>
+          <a href={`tel:+39${AZIENDA.telefono}`} style={{ color: colors.accent, textDecoration: "none", fontSize: 15, fontWeight: 500 }}>
+            +39 {AZIENDA.telefonoDisplay}
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
@@ -647,10 +672,6 @@ function SearchBar({ filters, setFilters, onSearch }) {
             {CITTA_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-        <div style={styles.searchField}>
-          <span style={styles.searchLabel}>Prezzo max</span>
-          <input type="number" style={styles.searchSelect} placeholder="Nessun limite" value={filters.prezzoMax} onChange={(e) => setFilters({ ...filters, prezzoMax: e.target.value })} />
-        </div>
         <button className="search-btn-responsive" style={styles.searchBtn} onClick={onSearch}>
           <IconSearch /> Cerca
         </button>
@@ -682,6 +703,65 @@ function PropertyCard({ property, onClick }) {
           <span style={styles.cardDetail}><span style={styles.cardDetailValue}>{property.bagni}</span> bagni</span>
         </div>
       </div>
+    </div>
+  );
+}
+
+function DetailContactForm({ property }) {
+  const [f, setF] = useState({ nome: "", telefono: "", email: "", messaggio: "" });
+  const [sent, setSent] = useState(false);
+  const [err, setErr] = useState("");
+
+  const handleSubmit = () => {
+    if (!f.nome || !f.email) { setErr("Compila almeno nome e email."); return; }
+    setErr("");
+    const subject = encodeURIComponent(`Richiesta info immobile ${property.codice}`);
+    const body = encodeURIComponent(
+      `Richiesta informazioni per l'immobile ${property.codice} - ${property.titolo}\n\nNome: ${f.nome}\nTelefono: ${f.telefono}\nEmail: ${f.email}\n\nMessaggio:\n${f.messaggio || "Vorrei ricevere informazioni su questo immobile."}`
+    );
+    try {
+      const a = document.createElement("a");
+      a.href = `mailto:${AZIENDA.email}?subject=${subject}&body=${body}`;
+      a.click();
+    } catch (e) {}
+    setSent(true);
+  };
+
+  if (sent) {
+    return (
+      <div style={{ ...styles.adminCard, marginTop: 32, textAlign: "center", padding: 40 }}>
+        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#22c55e", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 style={{ fontSize: 18, fontWeight: 600, color: colors.primary }}>Richiesta inviata</h3>
+        <p style={{ color: colors.textLight, fontSize: 14 }}>Ti contatteremo il prima possibile per l'immobile {property.codice}.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ ...styles.adminCard, marginTop: 32 }}>
+      <h3 style={{ fontSize: 18, fontWeight: 600, color: colors.primary, marginBottom: 16 }}>Richiedi informazioni</h3>
+      {err && <div style={{ background: "#fef2f2", color: colors.danger, padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 13 }}>{err}</div>}
+      <div className="form-row-responsive" style={styles.formRow}>
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>Nome e Cognome *</label>
+          <input style={styles.formInput} placeholder="Il tuo nome" value={f.nome} onChange={(e) => setF({...f, nome: e.target.value})} />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>Telefono</label>
+          <input style={styles.formInput} placeholder="Il tuo numero" value={f.telefono} onChange={(e) => setF({...f, telefono: e.target.value})} />
+        </div>
+      </div>
+      <div style={styles.formGroup}>
+        <label style={styles.formLabel}>Email *</label>
+        <input style={styles.formInput} placeholder="La tua email" type="email" value={f.email} onChange={(e) => setF({...f, email: e.target.value})} />
+      </div>
+      <div style={styles.formGroup}>
+        <label style={styles.formLabel}>Messaggio</label>
+        <textarea style={styles.formTextarea} placeholder={`Vorrei ricevere informazioni sull'immobile ${property.codice}`} value={f.messaggio} onChange={(e) => setF({...f, messaggio: e.target.value})} />
+      </div>
+      <button style={{ ...styles.formBtn, width: "100%" }} onClick={handleSubmit}>Invia Richiesta</button>
     </div>
   );
 }
@@ -766,28 +846,7 @@ function PropertyDetail({ property, setPage }) {
             </div>
           ))}
         </div>
-        <div style={{ ...styles.adminCard, marginTop: 32 }}>
-          <h3 style={{ fontSize: 18, fontWeight: 600, color: colors.primary, marginBottom: 16 }}>Richiedi informazioni</h3>
-          <div className="form-row-responsive" style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <label style={styles.formLabel}>Nome e Cognome</label>
-              <input style={styles.formInput} placeholder="Il tuo nome" />
-            </div>
-            <div style={styles.formGroup}>
-              <label style={styles.formLabel}>Telefono</label>
-              <input style={styles.formInput} placeholder="Il tuo numero" />
-            </div>
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.formLabel}>Email</label>
-            <input style={styles.formInput} placeholder="La tua email" type="email" />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.formLabel}>Messaggio</label>
-            <textarea style={styles.formTextarea} placeholder={`Vorrei ricevere informazioni sull'immobile ${property.codice}`} />
-          </div>
-          <button style={styles.formBtn}>Invia Richiesta</button>
-        </div>
+        <DetailContactForm property={property} />
       </div>
     </div>
   );
@@ -855,13 +914,35 @@ function HomePage({ properties, setPage, filters, setFilters, isMobile, heroImag
       </div>
 
       {/* Sezione Chi Siamo preview */}
-      <div style={{ background: colors.primary, padding: "56px 24px" }}>
-        <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ color: colors.accent, fontSize: 26, fontWeight: 300, marginBottom: 16, letterSpacing: 1 }}>Non una semplice agenzia</h2>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 16, lineHeight: 1.8, marginBottom: 8 }}>
-            Ci chiamiamo Studio Arte Immobiliare perche' crediamo che l'immobiliare sia come l'arte: richiede sensibilita', tecnica ed esperienza. Siamo nati dall'unione di professionisti che hanno scelto di fare squadra, mettendo al centro la persona prima di ogni trattativa.
-          </p>
-          <button style={{ ...styles.ctaBtn, background: colors.accent, color: colors.primary, marginTop: 20 }} onClick={() => setPage({ name: "chi-siamo" })}>Scopri la nostra storia</button>
+      <div style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, #1a2540 50%, ${colors.primaryLight} 100%)`, padding: isMobile ? "56px 24px" : "72px 24px", position: "relative", overflow: "hidden" }}>
+        {/* Decorative element */}
+        <div style={{ position: "absolute", top: -80, right: -80, width: 250, height: 250, borderRadius: "50%", border: `1px solid rgba(201,165,76,0.1)` }} />
+        <div style={{ position: "absolute", bottom: -60, left: -60, width: 180, height: 180, borderRadius: "50%", border: `1px solid rgba(201,165,76,0.08)` }} />
+        <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 32 : 48, alignItems: "center", position: "relative", zIndex: 2 }}>
+          <div>
+            <div style={{ width: 48, height: 3, background: colors.accent, borderRadius: 2, marginBottom: 20 }} />
+            <h2 style={{ color: colors.white, fontSize: isMobile ? 24 : 30, fontWeight: 300, marginBottom: 16, letterSpacing: 0.5, lineHeight: 1.3 }}>Non una semplice agenzia</h2>
+            <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 16, lineHeight: 1.8, marginBottom: 0 }}>
+              Ci chiamiamo Studio Arte Immobiliare perche' crediamo che l'immobiliare sia come l'arte: richiede sensibilita', tecnica ed esperienza. Siamo nati dall'unione di professionisti che hanno scelto di fare squadra, mettendo al centro la persona prima di ogni trattativa.
+            </p>
+            <div style={{ display: "flex", gap: 12, marginTop: 28, flexWrap: "wrap" }}>
+              <button style={{ ...styles.ctaBtn, background: colors.accent, color: colors.primary, padding: "12px 28px", borderRadius: 8, fontWeight: 600 }} onClick={() => setPage({ name: "chi-siamo" })}>Scopri chi siamo</button>
+              <button style={{ ...styles.ctaBtn, background: "transparent", color: colors.accent, padding: "12px 28px", borderRadius: 8, fontWeight: 600, border: `1px solid ${colors.accent}` }} onClick={() => setPage({ name: "contatti" })}>Contattaci</button>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            {[
+              { num: "15+", label: "Anni di esperienza" },
+              { num: "500+", label: "Trattative concluse" },
+              { num: "98%", label: "Clienti soddisfatti" },
+              { num: "3", label: "Zone operative" },
+            ].map((stat, i) => (
+              <div key={i} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 12, padding: 20, textAlign: "center", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div style={{ fontSize: 28, fontWeight: 700, color: colors.accent, marginBottom: 4 }}>{stat.num}</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 1 }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -937,77 +1018,160 @@ function ChiSiamoPage({ setPage }) {
   );
 }
 
-function ValutazionePage() {
+function ValutazionePage({ isMobile }) {
   const [sent, setSent] = useState(false);
+  const [valForm, setValForm] = useState({ nome: "", telefono: "", email: "", citta: "", tipo: "", indirizzo: "", mq: "", note: "" });
+  const [valError, setValError] = useState("");
+
+  const handleValSubmit = () => {
+    if (!valForm.nome || !valForm.telefono || !valForm.email || !valForm.indirizzo) {
+      setValError("Compila almeno nome, telefono, email e indirizzo.");
+      return;
+    }
+    setValError("");
+    // Invio email tramite mailto come fallback + salvataggio
+    const subject = encodeURIComponent("Richiesta Valutazione Immobile");
+    const body = encodeURIComponent(
+      `Nuova richiesta di valutazione immobile\n\nNome: ${valForm.nome}\nTelefono: ${valForm.telefono}\nEmail: ${valForm.email}\nCitta': ${valForm.citta}\nTipo: ${valForm.tipo}\nIndirizzo: ${valForm.indirizzo}\nSuperficie: ${valForm.mq} mq\nNote: ${valForm.note}`
+    );
+    // Tentativo invio silenzioso, poi mostra conferma
+    try {
+      const mailtoLink = document.createElement("a");
+      mailtoLink.href = `mailto:${AZIENDA.email}?subject=${subject}&body=${body}`;
+      mailtoLink.click();
+    } catch (e) { /* fallback silenzioso */ }
+    setSent(true);
+  };
+
   if (sent) {
     return (
-      <div style={{ ...styles.section, textAlign: "center", paddingTop: 80 }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>&#10003;</div>
-        <h2 className="section-title-responsive" style={styles.sectionTitle}>Richiesta Inviata</h2>
-        <p style={{ color: colors.textLight, fontSize: 16 }}>Ti contatteremo entro 24 ore per fissare un appuntamento di valutazione.</p>
+      <div style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center", maxWidth: 500, padding: "0 24px" }}>
+          <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #22c55e, #16a34a)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", boxShadow: "0 8px 24px rgba(34,197,94,0.3)" }}>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2 style={{ fontSize: 28, fontWeight: 300, color: colors.primary, marginBottom: 12 }}>Richiesta Inviata</h2>
+          <p style={{ color: colors.textLight, fontSize: 16, lineHeight: 1.7 }}>
+            Abbiamo ricevuto la tua richiesta di valutazione. Ti contatteremo entro 24 ore per fissare un appuntamento.
+          </p>
+        </div>
       </div>
     );
   }
   return (
-    <div style={styles.section}>
-      <h2 className="section-title-responsive" style={styles.sectionTitle}>Valutazione Gratuita</h2>
-      <div style={styles.sectionAccent} />
-      <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 16, maxWidth: 700 }}>
-        Conoscere il valore reale del proprio immobile e' il primo passo per prendere decisioni consapevoli.
-      </p>
-      <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 32, maxWidth: 700, color: colors.textLight }}>
-        Analizziamo il mercato di zona, le caratteristiche specifiche della proprieta' e i dati delle compravendite recenti per fornirti una stima precisa e documentata. Compila il modulo e ti ricontatteremo entro 24 ore.
-      </p>
-      <div style={{ ...styles.adminCard, maxWidth: 600 }}>
-        <div className="form-row-responsive" style={styles.formRow}>
-          <div style={styles.formGroup}>
-            <label style={styles.formLabel}>Nome e Cognome</label>
-            <input style={styles.formInput} placeholder="Il tuo nome" />
+    <div>
+      {/* Header */}
+      <div style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`, padding: isMobile ? "48px 24px" : "64px 24px", textAlign: "center" }}>
+        <h1 style={{ color: colors.white, fontSize: isMobile ? 28 : 36, fontWeight: 300, letterSpacing: 1, margin: 0 }}>Quanto vale il tuo immobile?</h1>
+        <div style={{ width: 48, height: 3, background: colors.accent, borderRadius: 2, margin: "16px auto 0" }} />
+        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: isMobile ? 15 : 17, marginTop: 20, maxWidth: 550, margin: "20px auto 0", lineHeight: 1.7, fontWeight: 300 }}>
+          Richiedi una valutazione professionale gratuita e senza impegno. Analizziamo mercato, posizione e caratteristiche per darti una stima precisa.
+        </p>
+      </div>
+
+      {/* Tre punti di forza */}
+      <div style={{ maxWidth: 900, margin: "-32px auto 0", padding: "0 24px", position: "relative", zIndex: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 16 }}>
+          {[
+            { num: "01", title: "Analisi di mercato", desc: "Studiamo i dati delle compravendite recenti nella tua zona per una stima basata su fatti concreti." },
+            { num: "02", title: "Sopralluogo dedicato", desc: "Visitiamo l'immobile per valutare ogni dettaglio che incide sul valore reale della proprieta'." },
+            { num: "03", title: "Report dettagliato", desc: "Ricevi un documento professionale con la valutazione completa e le strategie consigliate." },
+          ].map((step, i) => (
+            <div key={i} style={{ background: colors.white, borderRadius: 12, padding: 24, boxShadow: "0 4px 20px rgba(0,0,0,0.08)", textAlign: "center" }}>
+              <div style={{ fontSize: 32, fontWeight: 700, color: colors.accent, marginBottom: 8 }}>{step.num}</div>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: colors.primary, marginBottom: 8 }}>{step.title}</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.6, color: colors.textLight, margin: 0 }}>{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Form */}
+      <div style={{ maxWidth: 680, margin: "48px auto", padding: "0 24px" }}>
+        <div style={{ background: colors.white, borderRadius: 16, padding: isMobile ? 24 : 40, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: `1px solid ${colors.border}` }}>
+          <h2 style={{ fontSize: 22, fontWeight: 600, color: colors.primary, marginBottom: 6 }}>Compila il modulo</h2>
+          <p style={{ fontSize: 14, color: colors.textLight, marginBottom: 28, lineHeight: 1.6 }}>Ti ricontatteremo entro 24 ore per fissare l'appuntamento di valutazione.</p>
+          {valError && <div style={{ background: "#fef2f2", color: colors.danger, padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 13 }}>{valError}</div>}
+          <div className="form-row-responsive" style={styles.formRow}>
+            <div style={styles.formGroup}>
+              <label style={styles.formLabel}>Nome e Cognome *</label>
+              <input style={styles.formInput} placeholder="Il tuo nome" value={valForm.nome} onChange={(e) => setValForm({...valForm, nome: e.target.value})} />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.formLabel}>Telefono *</label>
+              <input style={styles.formInput} placeholder="Il tuo numero" value={valForm.telefono} onChange={(e) => setValForm({...valForm, telefono: e.target.value})} />
+            </div>
           </div>
           <div style={styles.formGroup}>
-            <label style={styles.formLabel}>Telefono</label>
-            <input style={styles.formInput} placeholder="Il tuo numero" />
+            <label style={styles.formLabel}>Email *</label>
+            <input style={styles.formInput} placeholder="La tua email" type="email" value={valForm.email} onChange={(e) => setValForm({...valForm, email: e.target.value})} />
           </div>
-        </div>
-        <div style={styles.formGroup}>
-          <label style={styles.formLabel}>Email</label>
-          <input style={styles.formInput} placeholder="La tua email" type="email" />
-        </div>
-        <div className="form-row-responsive" style={styles.formRow}>
+          <div className="form-row-responsive" style={styles.formRow}>
+            <div style={styles.formGroup}>
+              <label style={styles.formLabel}>Citta'</label>
+              <select style={styles.formSelect} value={valForm.citta} onChange={(e) => setValForm({...valForm, citta: e.target.value})}>
+                <option value="">Seleziona</option>
+                {CITTA_OPTIONS.map((c) => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.formLabel}>Tipo Immobile</label>
+              <select style={styles.formSelect} value={valForm.tipo} onChange={(e) => setValForm({...valForm, tipo: e.target.value})}>
+                <option value="">Seleziona</option>
+                {CATEGORIA_OPTIONS.map((c) => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
           <div style={styles.formGroup}>
-            <label style={styles.formLabel}>Citta'</label>
-            <select style={styles.formSelect}>
-              <option value="">Seleziona</option>
-              {CITTA_OPTIONS.map((c) => <option key={c}>{c}</option>)}
-            </select>
+            <label style={styles.formLabel}>Indirizzo dell'immobile *</label>
+            <input style={styles.formInput} placeholder="Via, numero civico, citta'" value={valForm.indirizzo} onChange={(e) => setValForm({...valForm, indirizzo: e.target.value})} />
           </div>
           <div style={styles.formGroup}>
-            <label style={styles.formLabel}>Tipo Immobile</label>
-            <select style={styles.formSelect}>
-              <option value="">Seleziona</option>
-              {CATEGORIA_OPTIONS.map((c) => <option key={c}>{c}</option>)}
-            </select>
+            <label style={styles.formLabel}>Superficie approssimativa (mq)</label>
+            <input style={styles.formInput} type="number" placeholder="Es. 80" value={valForm.mq} onChange={(e) => setValForm({...valForm, mq: e.target.value})} />
           </div>
+          <div style={styles.formGroup}>
+            <label style={styles.formLabel}>Note aggiuntive</label>
+            <textarea style={styles.formTextarea} placeholder="Stato dell'immobile, eventuali ristrutturazioni, particolarita'..." value={valForm.note} onChange={(e) => setValForm({...valForm, note: e.target.value})} />
+          </div>
+          <button
+            style={{ ...styles.formBtn, width: "100%", padding: "14px 24px", fontSize: 16, background: `linear-gradient(135deg, ${colors.accent}, #b89340)`, color: colors.white, borderRadius: 10, marginTop: 8 }}
+            onClick={handleValSubmit}
+          >
+            Richiedi Valutazione Gratuita
+          </button>
+          <p style={{ fontSize: 12, color: colors.textLight, textAlign: "center", marginTop: 12 }}>
+            I tuoi dati saranno trattati nel rispetto della normativa sulla privacy. Non verranno condivisi con terzi.
+          </p>
         </div>
-        <div style={styles.formGroup}>
-          <label style={styles.formLabel}>Indirizzo dell'immobile</label>
-          <input style={styles.formInput} placeholder="Via, numero civico, citta'" />
-        </div>
-        <div style={styles.formGroup}>
-          <label style={styles.formLabel}>Superficie approssimativa (mq)</label>
-          <input style={styles.formInput} type="number" placeholder="Es. 80" />
-        </div>
-        <div style={styles.formGroup}>
-          <label style={styles.formLabel}>Note aggiuntive</label>
-          <textarea style={styles.formTextarea} placeholder="Descrivi brevemente l'immobile, eventuali ristrutturazioni, stato attuale..." />
-        </div>
-        <button style={styles.formBtn} onClick={() => setSent(true)}>Richiedi Valutazione Gratuita</button>
       </div>
     </div>
   );
 }
 
 function ContattiPage({ isMobile }) {
+  const [contactForm, setContactForm] = useState({ nome: "", email: "", telefono: "", messaggio: "" });
+  const [contactSent, setContactSent] = useState(false);
+  const [contactError, setContactError] = useState("");
+
+  const handleContactSubmit = () => {
+    if (!contactForm.nome || !contactForm.email || !contactForm.messaggio) {
+      setContactError("Compila almeno nome, email e messaggio.");
+      return;
+    }
+    setContactError("");
+    const subject = encodeURIComponent("Nuovo contatto dal sito web");
+    const body = encodeURIComponent(
+      `Nuovo messaggio dal sito\n\nNome: ${contactForm.nome}\nEmail: ${contactForm.email}\nTelefono: ${contactForm.telefono}\n\nMessaggio:\n${contactForm.messaggio}`
+    );
+    try {
+      const mailtoLink = document.createElement("a");
+      mailtoLink.href = `mailto:${AZIENDA.email}?subject=${subject}&body=${body}`;
+      mailtoLink.click();
+    } catch (e) { /* fallback silenzioso */ }
+    setContactSent(true);
+  };
+
   return (
     <div style={styles.section}>
       <h2 className="section-title-responsive" style={styles.sectionTitle}>Contatti</h2>
@@ -1019,10 +1183,10 @@ function ContattiPage({ isMobile }) {
             <IconMapPin /> {AZIENDA.indirizzo}, {AZIENDA.cap} {AZIENDA.citta} ({AZIENDA.provincia})
           </div>
           <div style={styles.contactInfoItem}>
-            <IconPhone /> +39 {AZIENDA.telefonoDisplay}
+            <IconPhone /> <a href={`tel:+39${AZIENDA.telefono}`} style={{ color: "inherit", textDecoration: "none" }}>+39 {AZIENDA.telefonoDisplay}</a>
           </div>
           <div style={styles.contactInfoItem}>
-            <IconMail /> {AZIENDA.email}
+            <IconMail /> <a href={`mailto:${AZIENDA.email}`} style={{ color: "inherit", textDecoration: "none" }}>{AZIENDA.email}</a>
           </div>
           <div style={{ marginTop: 32 }}>
             <h4 style={{ color: colors.accent, marginBottom: 12, fontWeight: 600 }}>Orari</h4>
@@ -1032,28 +1196,45 @@ function ContattiPage({ isMobile }) {
               Domenica: Su appuntamento
             </p>
           </div>
+          <div style={{ marginTop: 24 }}>
+            <SocialIcons color={colors.accent} />
+          </div>
         </div>
         <div>
-          <div style={styles.adminCard}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: colors.primary, marginBottom: 16 }}>Scrivici</h3>
-            <div style={styles.formGroup}>
-              <label style={styles.formLabel}>Nome e Cognome</label>
-              <input style={styles.formInput} placeholder="Il tuo nome" />
+          {contactSent ? (
+            <div style={{ ...styles.adminCard, textAlign: "center", padding: 48 }}>
+              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#22c55e", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <h3 style={{ fontSize: 20, fontWeight: 600, color: colors.primary, marginBottom: 8 }}>Messaggio inviato</h3>
+              <p style={{ color: colors.textLight, fontSize: 14, lineHeight: 1.6 }}>Ti risponderemo il prima possibile.</p>
             </div>
-            <div style={styles.formGroup}>
-              <label style={styles.formLabel}>Email</label>
-              <input style={styles.formInput} placeholder="La tua email" type="email" />
+          ) : (
+            <div style={styles.adminCard}>
+              <h3 style={{ fontSize: 18, fontWeight: 600, color: colors.primary, marginBottom: 16 }}>Scrivici</h3>
+              {contactError && <div style={{ background: "#fef2f2", color: colors.danger, padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 13 }}>{contactError}</div>}
+              <div style={styles.formGroup}>
+                <label style={styles.formLabel}>Nome e Cognome *</label>
+                <input style={styles.formInput} placeholder="Il tuo nome" value={contactForm.nome} onChange={(e) => setContactForm({...contactForm, nome: e.target.value})} />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.formLabel}>Email *</label>
+                <input style={styles.formInput} placeholder="La tua email" type="email" value={contactForm.email} onChange={(e) => setContactForm({...contactForm, email: e.target.value})} />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.formLabel}>Telefono</label>
+                <input style={styles.formInput} placeholder="Il tuo numero" value={contactForm.telefono} onChange={(e) => setContactForm({...contactForm, telefono: e.target.value})} />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.formLabel}>Messaggio *</label>
+                <textarea style={styles.formTextarea} placeholder="Come possiamo aiutarti?" value={contactForm.messaggio} onChange={(e) => setContactForm({...contactForm, messaggio: e.target.value})} />
+              </div>
+              <button style={{ ...styles.formBtn, width: "100%" }} onClick={handleContactSubmit}>Invia Messaggio</button>
+              <p style={{ fontSize: 12, color: colors.textLight, textAlign: "center", marginTop: 12 }}>
+                I tuoi dati saranno trattati nel rispetto della normativa sulla privacy.
+              </p>
             </div>
-            <div style={styles.formGroup}>
-              <label style={styles.formLabel}>Telefono</label>
-              <input style={styles.formInput} placeholder="Il tuo numero" />
-            </div>
-            <div style={styles.formGroup}>
-              <label style={styles.formLabel}>Messaggio</label>
-              <textarea style={styles.formTextarea} placeholder="Come possiamo aiutarti?" />
-            </div>
-            <button style={styles.formBtn}>Invia Messaggio</button>
-          </div>
+          )}
         </div>
       </div>
     </div>
@@ -1139,8 +1320,8 @@ function Footer({ setPage }) {
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
           <span>{AZIENDA.nome}</span>
           <span>P.IVA: {AZIENDA.piva}</span>
-          <a href="#" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }} onClick={(e) => e.preventDefault()}>Privacy Policy</a>
-          <a href="#" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }} onClick={(e) => e.preventDefault()}>Cookie Policy</a>
+          <a href="#" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }} onClick={(e) => { e.preventDefault(); setPage({ name: "privacy" }); }}>Privacy Policy</a>
+          <a href="#" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }} onClick={(e) => { e.preventDefault(); setPage({ name: "privacy" }); }}>Cookie Policy</a>
         </div>
         <div style={{ marginTop: 8, color: "rgba(255,255,255,0.3)" }}>
           &copy; 2026 Studio Arte Immobiliare - Tutti i diritti riservati
@@ -1191,11 +1372,6 @@ function AdminLogin({ setPage, users, setCurrentUser }) {
         <button style={{ ...styles.navLink, color: colors.textLight, marginTop: 16, fontSize: 13, padding: 0 }} onClick={() => setPage({ name: "home" })}>
           Torna al sito
         </button>
-        <div style={{ marginTop: 24, padding: 16, background: colors.bg, borderRadius: 8, fontSize: 12, color: colors.textLight }}>
-          <strong>Demo:</strong><br />
-          Admin: admin@studioarteimmobiliare.com / admin123<br />
-          Agente: agente@studioarteimmobiliare.com / agente123
-        </div>
       </div>
     </div>
   );
@@ -1736,6 +1912,80 @@ function AdminPanel({ properties, setProperties, users, setUsers, currentUser, s
 }
 
 // ============================================================
+// GDPR - Cookie Banner + Privacy Policy
+// ============================================================
+
+function CookieBanner() {
+  const [visible, setVisible] = useState(() => {
+    try { return !window.sessionStorage.getItem("cookie_consent"); } catch { return true; }
+  });
+
+  if (!visible) return null;
+
+  const accept = () => {
+    try { window.sessionStorage.setItem("cookie_consent", "accepted"); } catch {}
+    setVisible(false);
+  };
+
+  return (
+    <div style={{
+      position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 9999,
+      background: colors.primary, color: colors.white,
+      padding: "16px 24px",
+      boxShadow: "0 -4px 20px rgba(0,0,0,0.2)",
+      display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 16,
+    }}>
+      <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, flex: "1 1 400px", maxWidth: 700 }}>
+        Questo sito utilizza cookie tecnici necessari al funzionamento. Non utilizziamo cookie di profilazione ne' di terze parti.
+        Per maggiori informazioni consulta la nostra <a href="#" onClick={(e) => { e.preventDefault(); }} style={{ color: colors.accent, textDecoration: "underline" }}>Privacy Policy</a>.
+      </p>
+      <div style={{ display: "flex", gap: 12 }}>
+        <button onClick={accept} style={{ background: colors.accent, color: colors.primary, border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+          Ho capito
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PrivacyPolicyPage() {
+  return (
+    <div style={{ ...styles.section, maxWidth: 800 }}>
+      <h2 className="section-title-responsive" style={styles.sectionTitle}>Informativa sulla Privacy</h2>
+      <div style={styles.sectionAccent} />
+      <div style={{ fontSize: 15, lineHeight: 1.8, color: colors.text }}>
+        <p><strong>Titolare del trattamento</strong><br />
+        {AZIENDA.nome}, con sede in {AZIENDA.indirizzo}, {AZIENDA.cap} {AZIENDA.citta} ({AZIENDA.provincia}), P.IVA {AZIENDA.piva}.<br />
+        Email di contatto: {AZIENDA.email}</p>
+
+        <p><strong>Dati raccolti</strong><br />
+        Attraverso i moduli presenti sul sito raccogliamo esclusivamente i dati forniti volontariamente dall'utente: nome e cognome, indirizzo email, numero di telefono e il contenuto del messaggio inviato. Non raccogliamo dati in modo automatico, ad eccezione di informazioni tecniche anonime necessarie al funzionamento del sito (log del server).</p>
+
+        <p><strong>Finalita' del trattamento</strong><br />
+        I dati personali forniti tramite i moduli di contatto e di richiesta valutazione vengono utilizzati esclusivamente per rispondere alle richieste dell'utente e per fornire il servizio richiesto. Non utilizziamo i dati per attivita' di marketing automatizzato ne' li cediamo a terzi.</p>
+
+        <p><strong>Base giuridica</strong><br />
+        Il trattamento si fonda sul consenso dell'interessato, espresso al momento della compilazione e dell'invio del modulo, e sull'esecuzione di misure precontrattuali adottate su richiesta dell'interessato (Art. 6, comma 1, lett. a e b del GDPR).</p>
+
+        <p><strong>Conservazione dei dati</strong><br />
+        I dati vengono conservati per il tempo strettamente necessario a evadere la richiesta e, successivamente, per un periodo massimo di 24 mesi, salvo obblighi di legge che ne richiedano una conservazione piu' lunga.</p>
+
+        <p><strong>Diritti dell'interessato</strong><br />
+        In conformita' al Regolamento UE 2016/679 (GDPR), l'utente ha diritto di accesso, rettifica, cancellazione, limitazione e portabilita' dei propri dati, nonche' il diritto di opposizione al trattamento. Per esercitare tali diritti e' possibile contattarci all'indirizzo {AZIENDA.email}.</p>
+
+        <p><strong>Cookie</strong><br />
+        Questo sito utilizza esclusivamente cookie tecnici necessari al corretto funzionamento. Non vengono utilizzati cookie di profilazione ne' cookie di terze parti per finalita' pubblicitarie.</p>
+
+        <p><strong>Modifiche alla presente informativa</strong><br />
+        Il Titolare si riserva il diritto di apportare modifiche alla presente informativa in qualsiasi momento. La versione aggiornata sara' sempre disponibile su questa pagina.</p>
+
+        <p style={{ fontSize: 13, color: colors.textLight, marginTop: 32 }}>Ultimo aggiornamento: Marzo 2026</p>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // MAIN APP
 // ============================================================
 
@@ -1756,7 +2006,7 @@ export default function App() {
   const [users, setUsers] = useState(INITIAL_USERS);
   const [currentUser, setCurrentUser] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [filters, setFilters] = useState({ tipo: "", categoria: "", citta: "", prezzoMax: "" });
+  const [filters, setFilters] = useState({ tipo: "", categoria: "", citta: "" });
   const [heroImage, setHeroImage] = useState("");
   const isMobile = useIsMobile();
 
@@ -1803,6 +2053,8 @@ export default function App() {
         return <ValutazionePage isMobile={isMobile} />;
       case "contatti":
         return <ContattiPage isMobile={isMobile} />;
+      case "privacy":
+        return <PrivacyPolicyPage />;
       default:
         return <HomePage properties={properties} setPage={setPage} filters={filters} setFilters={setFilters} isMobile={isMobile} heroImage={heroImage} />;
     }
@@ -1812,8 +2064,9 @@ export default function App() {
     <div style={styles.page}>
       {/* CSS responsive globale */}
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         * { box-sizing: border-box; }
-        body { margin: 0; overflow-x: hidden; }
+        body { margin: 0; overflow-x: hidden; font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; }
         @media (min-width: 769px) {
           .form-row-responsive { grid-template-columns: 1fr 1fr !important; }
           .form-row-3col { grid-template-columns: 1fr 1fr 1fr !important; }
@@ -1849,6 +2102,7 @@ export default function App() {
       {showMobileMenu && <MobileMenu page={page} setPage={setPage} onClose={() => setShowMobileMenu(false)} />}
       {renderPage()}
       <Footer setPage={setPage} isMobile={isMobile} />
+      <CookieBanner />
     </div>
   );
 }
