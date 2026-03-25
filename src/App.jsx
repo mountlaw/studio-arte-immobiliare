@@ -603,14 +603,18 @@ function Hero({ setPage, isMobile, heroImage }) {
       }}>
         <BrandLogo size={isMobile ? 120 : 170} />
         <p style={{
-          color: "rgba(255,255,255,0.8)",
-          fontSize: isMobile ? 14 : 17,
+          color: "rgba(255,255,255,0.85)",
+          fontSize: isMobile ? 15 : 18,
           marginTop: 20,
           fontWeight: 300,
           textAlign: "center",
           letterSpacing: 1,
+          maxWidth: 550,
+          lineHeight: 1.6,
         }}>
-          Compravendite e locazioni tra Milano e Como
+          Sensibilita', tecnica ed esperienza al servizio del tuo immobile.
+          <br />
+          <span style={{ color: colors.accent, fontSize: isMobile ? 12 : 14, letterSpacing: 3, textTransform: "uppercase", marginTop: 8, display: "inline-block" }}>Milano &bull; Como &bull; Brianza</span>
         </p>
       </div>
     </div>
@@ -820,7 +824,7 @@ function HomePage({ properties, setPage, filters, setFilters, isMobile, heroImag
         onSearch={() => setPage({ name: filters.tipo === "affitto" ? "affitti" : "vendite" })}
       />
       <div style={{ ...styles.section, paddingTop: 64 }}>
-        <h2 className="section-title-responsive" style={styles.sectionTitle}>Proposte in Evidenza</h2>
+        <h2 className="section-title-responsive" style={styles.sectionTitle}>Immobili Selezionati per Te</h2>
         <div style={styles.sectionAccent} />
         <div className="card-grid-responsive" style={styles.cardGrid}>
           {evidenza.map((p) => (
@@ -828,40 +832,105 @@ function HomePage({ properties, setPage, filters, setFilters, isMobile, heroImag
           ))}
         </div>
       </div>
-      <div style={{ ...styles.section, paddingTop: 0 }}>
-        <div style={styles.ctaBanner}>
-          <h2 className="cta-title-responsive" style={styles.ctaTitle}>Quanto vale la tua casa?</h2>
-          <p style={styles.ctaText}>Richiedi una valutazione gratuita e senza impegno del tuo immobile.</p>
-          <button style={styles.ctaBtn} onClick={() => setPage({ name: "valutazione" })}>Richiedi Valutazione</button>
+      {/* Sezione Servizi */}
+      <div style={{ ...styles.section, paddingTop: 16, paddingBottom: 48 }}>
+        <h2 className="section-title-responsive" style={styles.sectionTitle}>Il Nostro Approccio</h2>
+        <div style={styles.sectionAccent} />
+        <p style={{ fontSize: 16, lineHeight: 1.8, color: colors.textLight, maxWidth: 700, marginBottom: 32 }}>
+          Ogni immobile ha una storia e ogni cliente un'esigenza diversa. Per questo offriamo un servizio completo e trasparente, dall'incarico alla conclusione della trattativa.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 24 }}>
+          {[
+            { titolo: "Vendita e Acquisto", desc: "Valutazione accurata, strategia di marketing personalizzata e accompagnamento fino al rogito. Ogni proprieta' viene valorizzata al meglio per raggiungere il risultato ottimale." },
+            { titolo: "Locazione e Gestione", desc: "Dalla ricerca dell'inquilino ideale alla gestione del contratto, ci occupiamo di ogni aspetto per garantire serenita' sia al proprietario che all'affittuario." },
+            { titolo: "Consulenza e Valutazione", desc: "Analisi di mercato approfondita, valutazione professionale e consulenza su misura per prendere decisioni consapevoli e informate sul proprio patrimonio." },
+          ].map((s, i) => (
+            <div key={i} style={{ background: colors.white, borderRadius: 12, padding: 28, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+              <div style={{ width: 48, height: 3, background: colors.accent, borderRadius: 2, marginBottom: 16 }} />
+              <h3 style={{ fontSize: 18, fontWeight: 600, color: colors.primary, marginBottom: 10 }}>{s.titolo}</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: colors.textLight, margin: 0 }}>{s.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
-      {/* Stats section rimossa su richiesta */}
+
+      {/* Sezione Chi Siamo preview */}
+      <div style={{ background: colors.primary, padding: "56px 24px" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
+          <h2 style={{ color: colors.accent, fontSize: 26, fontWeight: 300, marginBottom: 16, letterSpacing: 1 }}>Non una semplice agenzia</h2>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 16, lineHeight: 1.8, marginBottom: 8 }}>
+            Ci chiamiamo Studio Arte Immobiliare perche' crediamo che l'immobiliare sia come l'arte: richiede sensibilita', tecnica ed esperienza. Siamo nati dall'unione di professionisti che hanno scelto di fare squadra, mettendo al centro la persona prima di ogni trattativa.
+          </p>
+          <button style={{ ...styles.ctaBtn, background: colors.accent, color: colors.primary, marginTop: 20 }} onClick={() => setPage({ name: "chi-siamo" })}>Scopri la nostra storia</button>
+        </div>
+      </div>
+
+      {/* CTA Valutazione */}
+      <div style={{ ...styles.section, paddingTop: 48 }}>
+        <div style={styles.ctaBanner}>
+          <h2 className="cta-title-responsive" style={styles.ctaTitle}>Vuoi conoscere il valore del tuo immobile?</h2>
+          <p style={styles.ctaText}>Richiedi una valutazione professionale, gratuita e senza impegno. Ti guideremo con trasparenza in ogni fase.</p>
+          <button style={styles.ctaBtn} onClick={() => setPage({ name: "valutazione" })}>Richiedi Valutazione Gratuita</button>
+        </div>
+      </div>
     </div>
   );
 }
 
-function ChiSiamoPage() {
+function ChiSiamoPage({ setPage }) {
   return (
-    <div style={styles.section}>
-      <h2 className="section-title-responsive" style={styles.sectionTitle}>Chi Siamo</h2>
-      <div style={styles.sectionAccent} />
-      <div style={{ maxWidth: 800 }}>
-        <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 24 }}>
-          Studio Arte Immobiliare nasce dalla passione per il mondo immobiliare e dalla volonta' di offrire un servizio
-          di qualita' superiore a chi cerca o vende casa tra Milano e Como.
+    <div>
+      {/* Intro */}
+      <div style={{ background: colors.primary, padding: "56px 24px", textAlign: "center" }}>
+        <h1 style={{ color: colors.white, fontSize: 34, fontWeight: 300, letterSpacing: 2, margin: 0 }}>Chi Siamo</h1>
+        <div style={{ width: 48, height: 3, background: colors.accent, borderRadius: 2, margin: "16px auto 0" }} />
+        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 17, marginTop: 20, maxWidth: 650, margin: "20px auto 0", lineHeight: 1.7, fontWeight: 300 }}>
+          Dove la passione per il settore immobiliare si fonde con l'esperienza e un approccio unico.
         </p>
-        <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 24 }}>
-          Il nostro approccio si basa sulla trasparenza, la competenza e l'attenzione ai dettagli. Ogni immobile che trattiamo
-          viene analizzato e presentato con cura, perche' crediamo che comprare o vendere casa sia una delle decisioni piu'
-          importanti nella vita di una persona.
+      </div>
+
+      <div style={{ ...styles.section, maxWidth: 800 }}>
+        {/* Il nostro inizio */}
+        <h2 style={{ fontSize: 24, fontWeight: 600, color: colors.primary, marginBottom: 16 }}>Il nostro inizio: fare squadra</h2>
+        <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 32, color: colors.text }}>
+          Studio Arte Immobiliare nasce dall'unione di colleghi con anni di esperienza nel settore, che hanno deciso di mettere insieme competenze e visione. Non siamo partiti da soli, ma come gruppo. Crediamo fermamente che solo attraverso la collaborazione si possa offrire un servizio di qualita' superiore. Questa sinergia ci motiva ogni giorno a superare le aspettative e a garantire un supporto concreto e affidabile ai nostri clienti.
         </p>
-        <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 24 }}>
-          Operiamo principalmente tra Milano e la provincia di Como, due mercati che conosciamo in profondita'. Dalla ricerca
-          dell'immobile ideale alla consulenza per la vendita, accompagniamo i nostri clienti in ogni fase del percorso.
+
+        {/* L'arte del servizio */}
+        <h2 style={{ fontSize: 24, fontWeight: 600, color: colors.primary, marginBottom: 16 }}>L'arte del servizio immobiliare</h2>
+        <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 32, color: colors.text }}>
+          Ci chiamiamo "Studio Arte Immobiliare" per una ragione precisa: andiamo oltre la classica agenzia. Per noi, prima della commissione e prima del servizio, c'e' la persona. Ogni immobile ha una sua storia, preziosa e unica. Il nostro impegno e' comprenderla e valorizzarla al meglio, offrendo un'esperienza in cui i nostri clienti sanno di essere al centro della nostra attenzione.
         </p>
-        <div style={{ ...styles.ctaBanner, marginTop: 48, textAlign: "center" }}>
+
+        {/* I valori */}
+        <h2 style={{ fontSize: 24, fontWeight: 600, color: colors.primary, marginBottom: 16 }}>I valori che ci guidano</h2>
+        <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 16, color: colors.text }}>
+          Professionalita', lavoro di squadra e un'immagine curata sono i pilastri del nostro lavoro quotidiano. Vogliamo che chi si rivolge a noi percepisca Studio Arte Immobiliare non come una semplice agenzia di zona, ma come un partner fidato e competente, attento ai dettagli e sempre orientato al raggiungimento degli obiettivi di ciascuno.
+        </p>
+        <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 32, color: colors.text }}>
+          Operiamo tra Milano, Como e la Brianza, un territorio che conosciamo a fondo. Dall'incarico alla firma dal notaio, accompagniamo ogni cliente con trasparenza in ogni fase del percorso.
+        </p>
+
+        {/* Valori cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20, margin: "32px 0 48px" }}>
+          {[
+            { titolo: "Professionalita'", desc: "Competenza reale, aggiornamento continuo e metodo rigoroso in ogni trattativa." },
+            { titolo: "Trasparenza", desc: "Comunicazione chiara e onesta, senza sorprese. Sempre." },
+            { titolo: "Squadra", desc: "Il nostro punto di forza e' il gruppo: competenze diverse unite da un obiettivo comune." },
+            { titolo: "Persona al centro", desc: "Prima dell'immobile viene chi lo vive. Ascoltiamo, capiamo, agiamo." },
+          ].map((v, i) => (
+            <div key={i} style={{ background: colors.bg, borderRadius: 12, padding: 24, borderLeft: `3px solid ${colors.accent}` }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.primary, marginBottom: 8 }}>{v.titolo}</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.6, color: colors.textLight, margin: 0 }}>{v.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div style={{ ...styles.ctaBanner, textAlign: "center" }}>
           <h3 style={{ ...styles.ctaTitle, fontSize: 22 }}>Vuoi conoscerci di persona?</h3>
-          <p style={styles.ctaText}>Vieni a trovarci in ufficio o contattaci per una consulenza gratuita.</p>
+          <p style={styles.ctaText}>Vieni a trovarci in ufficio o contattaci per una consulenza senza impegno.</p>
+          <button style={styles.ctaBtn} onClick={() => setPage({ name: "contatti" })}>Contattaci</button>
         </div>
       </div>
     </div>
@@ -883,9 +952,11 @@ function ValutazionePage() {
     <div style={styles.section}>
       <h2 className="section-title-responsive" style={styles.sectionTitle}>Valutazione Gratuita</h2>
       <div style={styles.sectionAccent} />
-      <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 32, maxWidth: 700 }}>
-        Vuoi sapere quanto vale il tuo immobile? Compila il modulo e ti contatteremo per una valutazione
-        professionale, gratuita e senza impegno.
+      <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 16, maxWidth: 700 }}>
+        Conoscere il valore reale del proprio immobile e' il primo passo per prendere decisioni consapevoli.
+      </p>
+      <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 32, maxWidth: 700, color: colors.textLight }}>
+        Analizziamo il mercato di zona, le caratteristiche specifiche della proprieta' e i dati delle compravendite recenti per fornirti una stima precisa e documentata. Compila il modulo e ti ricontatteremo entro 24 ore.
       </p>
       <div style={{ ...styles.adminCard, maxWidth: 600 }}>
         <div className="form-row-responsive" style={styles.formRow}>
@@ -1030,8 +1101,8 @@ function Footer({ setPage }) {
         <div>
           <div style={styles.footerTitle}>Studio Arte Immobiliare</div>
           <p style={styles.footerText}>
-            La tua agenzia di fiducia tra Milano e Como.<br />
-            Compravendite e locazioni con professionalita' e passione.
+            L'immobiliare e' come l'arte: richiede sensibilita', tecnica ed esperienza.<br />
+            Ogni immobile ha una storia. Noi la valorizziamo.
           </p>
           <div style={{ marginTop: 16 }}>
             <SocialIcons color={colors.accent} />
@@ -1727,7 +1798,7 @@ export default function App() {
       case "affitti":
         return <ListingsPage properties={properties} tipo="affitto" setPage={setPage} isMobile={isMobile} />;
       case "chi-siamo":
-        return <ChiSiamoPage isMobile={isMobile} />;
+        return <ChiSiamoPage isMobile={isMobile} setPage={setPage} />;
       case "valutazione":
         return <ValutazionePage isMobile={isMobile} />;
       case "contatti":
