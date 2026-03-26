@@ -1581,21 +1581,29 @@ function PropertyForm({ property, onSave, onCancel }) {
   const [newFeature, setNewFeature] = useState("");
   const [newImage, setNewImage] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState("");
 
   const uploadToSupabase = async (files) => {
     setUploading(true);
+    setUploadError("");
+    setUploadSuccess("");
+    let uploaded = 0;
     try {
       for (const file of files) {
         const ext = file.name.split(".").pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
         const path = `immobili/${fileName}`;
         const { error } = await supabase.storage.from("foto-immobili").upload(path, file, { cacheControl: "3600", upsert: false });
-        if (error) { console.error("Upload error:", error); continue; }
+        if (error) { console.error("Upload error:", error); setUploadError("Errore nel caricamento di " + file.name); continue; }
         const publicUrl = `${SUPABASE_STORAGE_URL}/${path}`;
         setForm(prev => ({ ...prev, immagini: [...prev.immagini, publicUrl] }));
+        uploaded++;
       }
-    } catch (err) { console.error("Upload failed:", err); }
+      if (uploaded > 0) setUploadSuccess(uploaded + (uploaded === 1 ? " foto caricata" : " foto caricate") + " con successo");
+    } catch (err) { console.error("Upload failed:", err); setUploadError("Errore di connessione durante il caricamento"); }
     setUploading(false);
+    setTimeout(() => { setUploadSuccess(""); setUploadError(""); }, 5000);
   };
 
   const update = (field, value) => setForm({ ...form, [field]: value });
@@ -1628,7 +1636,7 @@ function PropertyForm({ property, onSave, onCancel }) {
         </div>
         <div style={styles.formGroup}>
           <label style={styles.formLabel}>Prezzo ({form.tipo === "affitto" ? "EUR/mese" : "EUR"})</label>
-          <input style={styles.formInput} type="number" value={form.prezzo} onChange={(e) => update("prezzo", Number(e.target.value))} />
+          <input style={styles.formInput} type="text" inputMode="numeric" value={form.prezzo ? new Intl.NumberFormat("it-IT").format(form.prezzo) + " \u20AC" : ""} onChange={(e) => { const raw = e.target.value.replace(/[^\d]/g, ""); update("prezzo", raw ? Number(raw) : 0); }} placeholder="es. 185.000" />
         </div>
       </div>
       <div className="form-row-4col" style={{ ...styles.formRow, gridTemplateColumns: "1fr 1fr 1fr 1fr" }}>
@@ -1652,9 +1660,7 @@ function PropertyForm({ property, onSave, onCancel }) {
       <div className="form-row-responsive" style={styles.formRow}>
         <div style={styles.formGroup}>
           <label style={styles.formLabel}>Citta'</label>
-          <select style={styles.formSelect} value={form.citta} onChange={(e) => update("citta", e.target.value)}>
-            {CITTA_OPTIONS.map((c) => <option key={c}>{c}</option>)}
-          </select>
+          <input style={styles.formInput} value={form.citta} onChange={(e) => update("citta", e.target.value)} placeholder="Milano, Como, Monza..." />
         </div>
         <div style={styles.formGroup}>
           <label style={styles.formLabel}>Zona</label>
@@ -1739,7 +1745,9 @@ function PropertyForm({ property, onSave, onCancel }) {
             <button style={styles.formBtnSecondary} onClick={() => { if (newImage.trim()) { update("immagini", [...form.immagini, newImage.trim()]); setNewImage(""); } }}>Aggiungi</button>
           </div>
         </div>
-        <div style={{ fontSize: 12, color: colors.textLight }}>
+        {uploadError && <div style={{ background: "#fef2f2", color: colors.danger, padding: "8px 12px", borderRadius: 8, fontSize: 13, marginTop: 8 }}>{uploadError}</div>}
+        {uploadSuccess && <div style={{ background: "#f0fdf4", color: "#16a34a", padding: "8px 12px", borderRadius: 8, fontSize: 13, marginTop: 8 }}>{uploadSuccess}</div>}
+        <div style={{ fontSize: 12, color: colors.textLight, marginTop: 4 }}>
           Le foto vengono caricate in cloud. Puoi selezionare piu' foto alla volta. Formati: JPG, PNG, WebP.
         </div>
       </div>
