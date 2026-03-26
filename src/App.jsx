@@ -422,7 +422,7 @@ function Navbar({ page, setPage, setShowMobileMenu, showMobileMenu, isMobile }) 
   return (
     <nav style={styles.navbar}>
       <div style={{ cursor: "pointer" }} onClick={() => setPage({ name: "home" })}>
-        <NavLogo size={46} />
+        <NavLogo size={56} />
       </div>
       {!isMobile && (
         <div style={styles.navLinks}>
@@ -1681,8 +1681,8 @@ function PropertyForm({ property, onSave, onCancel }) {
         </div>
       </div>
       <div style={styles.formGroup}>
-        <label style={styles.formLabel}>Immagini (URL)</label>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+        <label style={styles.formLabel}>Immagini</label>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
           {form.immagini.map((img, i) => (
             <div key={i} style={{ position: "relative" }}>
               <img src={img} alt="" style={{ width: 100, height: 75, objectFit: "cover", borderRadius: 6 }} />
@@ -1690,12 +1690,31 @@ function PropertyForm({ property, onSave, onCancel }) {
             </div>
           ))}
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input style={{ ...styles.formInput, flex: 1 }} value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder="https://..." />
-          <button style={styles.formBtnSecondary} onClick={() => { if (newImage.trim()) { update("immagini", [...form.immagini, newImage.trim()]); setNewImage(""); } }}>Aggiungi</button>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
+          <label style={{ background: colors.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "inherit" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Carica foto
+            <input type="file" accept="image/*" multiple onChange={(e) => {
+              const files = Array.from(e.target.files);
+              if (!files.length) return;
+              files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                  setForm(prev => ({ ...prev, immagini: [...prev.immagini, ev.target.result] }));
+                };
+                reader.readAsDataURL(file);
+              });
+              e.target.value = "";
+            }} style={{ display: "none" }} />
+          </label>
+          <span style={{ fontSize: 13, color: colors.textLight }}>oppure</span>
+          <div style={{ display: "flex", gap: 8, flex: 1, minWidth: 200 }}>
+            <input style={{ ...styles.formInput, flex: 1 }} value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder="Incolla URL immagine..." />
+            <button style={styles.formBtnSecondary} onClick={() => { if (newImage.trim()) { update("immagini", [...form.immagini, newImage.trim()]); setNewImage(""); } }}>Aggiungi</button>
+          </div>
         </div>
-        <div style={{ fontSize: 12, color: colors.textLight, marginTop: 4 }}>
-          In produzione le immagini verranno caricate tramite upload diretto. Per ora puoi usare URL di immagini esistenti.
+        <div style={{ fontSize: 12, color: colors.textLight }}>
+          Puoi selezionare piu' foto alla volta. Formati supportati: JPG, PNG, WebP.
         </div>
       </div>
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 8, marginBottom: 24 }}>
