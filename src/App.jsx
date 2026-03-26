@@ -14,7 +14,43 @@ const supabase = createClient(
 const SUPABASE_STORAGE_URL = "https://tcoeolazrlitiyxtyful.supabase.co/storage/v1/object/public/foto-immobili";
 
 // --- MOCK DATA ---
-const INITIAL_PROPERTIES = [
+// Funzioni database Supabase
+const DB_URL = "https://tcoeolazrlitiyxtyful.supabase.co/rest/v1";
+const DB_HEADERS = {
+  "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjb2VvbGF6cmxpdGl5eHR5ZnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjY3NjEsImV4cCI6MjA5MDA0Mjc2MX0.DaC_4I33OmQ6vRjUsx_oS19FXrHOdojSfS66IRIfqSc",
+  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjb2VvbGF6cmxpdGl5eHR5ZnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjY3NjEsImV4cCI6MjA5MDA0Mjc2MX0.DaC_4I33OmQ6vRjUsx_oS19FXrHOdojSfS66IRIfqSc",
+  "Content-Type": "application/json",
+  "Prefer": "return=representation"
+};
+
+async function dbFetchProperties() {
+  const res = await fetch(`${DB_URL}/immobili?order=created_at.desc`, { headers: DB_HEADERS });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+async function dbInsertProperty(prop) {
+  const { id, ...data } = prop;
+  const res = await fetch(`${DB_URL}/immobili`, { method: "POST", headers: DB_HEADERS, body: JSON.stringify(data) });
+  if (!res.ok) throw new Error("Errore nel salvataggio");
+  const rows = await res.json();
+  return rows[0];
+}
+
+async function dbUpdateProperty(id, prop) {
+  const { id: _, ...data } = prop;
+  const res = await fetch(`${DB_URL}/immobili?id=eq.${id}`, { method: "PATCH", headers: DB_HEADERS, body: JSON.stringify(data) });
+  if (!res.ok) throw new Error("Errore nell'aggiornamento");
+  const rows = await res.json();
+  return rows[0];
+}
+
+async function dbDeleteProperty(id) {
+  const res = await fetch(`${DB_URL}/immobili?id=eq.${id}`, { method: "DELETE", headers: DB_HEADERS });
+  if (!res.ok) throw new Error("Errore nella cancellazione");
+}
+
+const _UNUSED_INITIAL_PROPERTIES = [
   {
     id: 1,
     codice: "SAI001",
@@ -1777,18 +1813,33 @@ function AdminImmobili({ properties, setProperties }) {
     (p) => p.titolo.toLowerCase().includes(search.toLowerCase()) || p.codice.toLowerCase().includes(search.toLowerCase()) || p.citta.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSave = (form) => {
-    if (editing === "new") {
-      setProperties([...properties, { ...form, id: Date.now() }]);
-    } else {
-      setProperties(properties.map((p) => (p.id === form.id ? form : p)));
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (form) => {
+    setSaving(true);
+    try {
+      if (editing === "new") {
+        const saved = await dbInsertProperty(form);
+        setProperties([saved, ...properties]);
+      } else {
+        const saved = await dbUpdateProperty(form.id, form);
+        setProperties(properties.map((p) => (p.id === form.id ? saved : p)));
+      }
+      setEditing(null);
+    } catch (err) {
+      alert("Errore nel salvataggio: " + err.message);
     }
-    setEditing(null);
+    setSaving(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (confirm("Sei sicuro di voler eliminare questo immobile?")) {
-      setProperties(properties.filter((p) => p.id !== id));
+      try {
+        await dbDeleteProperty(id);
+        setProperties(properties.filter((p) => p.id !== id));
+      } catch (err) {
+        alert("Errore nella cancellazione: " + err.message);
+      }
     }
   };
 
@@ -2055,7 +2106,8 @@ function useIsMobile(breakpoint = 768) {
 
 export default function App() {
   const [page, setPage] = useState({ name: "home" });
-  const [properties, setProperties] = useState(INITIAL_PROPERTIES);
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState(INITIAL_USERS);
   const [currentUser, setCurrentUser] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -2063,10 +2115,27 @@ export default function App() {
   const [heroImage, setHeroImage] = useState("");
   const isMobile = useIsMobile();
 
+  // Carica immobili dal database
+  useEffect(() => {
+    dbFetchProperties().then(data => { setProperties(data); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
   // Scroll to top on page change
   useEffect(() => { window.scrollTo(0, 0); }, [page]);
   // Close mobile menu on page change
   useEffect(() => { setShowMobileMenu(false); }, [page]);
+
+  // Loading
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: colors.bg }}>
+        <div style={{ textAlign: "center" }}>
+          <BrandLogo size={60} />
+          <p style={{ color: colors.textLight, marginTop: 16, fontSize: 14 }}>Caricamento...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Admin pages
   if (page.name === "admin-login") {
