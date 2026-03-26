@@ -1,8 +1,17 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 // ============================================================
 // STUDIO ARTE IMMOBILIARE - Sito Web + Dashboard Admin
 // ============================================================
+
+// --- SUPABASE CLIENT ---
+const supabase = createClient(
+  "https://tcoeolazrlitiyxtyful.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjb2VvbGF6cmxpdGl5eHR5ZnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjY3NjEsImV4cCI6MjA5MDA0Mjc2MX0.DaC_4I33OmQ6vRjUsx_oS19FXrHOdojSfS66IRIfqSc"
+);
+
+const SUPABASE_STORAGE_URL = "https://tcoeolazrlitiyxtyful.supabase.co/storage/v1/object/public/foto-immobili";
 
 // --- MOCK DATA ---
 const INITIAL_PROPERTIES = [
@@ -1565,6 +1574,23 @@ function PropertyForm({ property, onSave, onCancel }) {
   const [form, setForm] = useState(property || { ...EMPTY_PROPERTY });
   const [newFeature, setNewFeature] = useState("");
   const [newImage, setNewImage] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const uploadToSupabase = async (files) => {
+    setUploading(true);
+    try {
+      for (const file of files) {
+        const ext = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+        const path = `immobili/${fileName}`;
+        const { error } = await supabase.storage.from("foto-immobili").upload(path, file, { cacheControl: "3600", upsert: false });
+        if (error) { console.error("Upload error:", error); continue; }
+        const publicUrl = `${SUPABASE_STORAGE_URL}/${path}`;
+        setForm(prev => ({ ...prev, immagini: [...prev.immagini, publicUrl] }));
+      }
+    } catch (err) { console.error("Upload failed:", err); }
+    setUploading(false);
+  };
 
   const update = (field, value) => setForm({ ...form, [field]: value });
 
@@ -1691,19 +1717,13 @@ function PropertyForm({ property, onSave, onCancel }) {
           ))}
         </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
-          <label style={{ background: colors.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "inherit" }}>
+          <label style={{ background: uploading ? colors.textLight : colors.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 14, fontWeight: 600, cursor: uploading ? "wait" : "pointer", display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "inherit", opacity: uploading ? 0.7 : 1 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Carica foto
-            <input type="file" accept="image/*" multiple onChange={(e) => {
+            {uploading ? "Caricamento..." : "Carica foto"}
+            <input type="file" accept="image/*" multiple disabled={uploading} onChange={(e) => {
               const files = Array.from(e.target.files);
               if (!files.length) return;
-              files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                  setForm(prev => ({ ...prev, immagini: [...prev.immagini, ev.target.result] }));
-                };
-                reader.readAsDataURL(file);
-              });
+              uploadToSupabase(files);
               e.target.value = "";
             }} style={{ display: "none" }} />
           </label>
@@ -1714,7 +1734,7 @@ function PropertyForm({ property, onSave, onCancel }) {
           </div>
         </div>
         <div style={{ fontSize: 12, color: colors.textLight }}>
-          Puoi selezionare piu' foto alla volta. Formati supportati: JPG, PNG, WebP.
+          Le foto vengono caricate in cloud. Puoi selezionare piu' foto alla volta. Formati: JPG, PNG, WebP.
         </div>
       </div>
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 8, marginBottom: 24 }}>
