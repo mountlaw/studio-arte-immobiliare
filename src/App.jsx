@@ -340,8 +340,8 @@ const styles = {
   cardDetailValue: { fontWeight: 600, color: colors.text },
 
   // Property Detail
-  detailHero: { position: "relative", background: "#111", height: "auto", maxHeight: 450, aspectRatio: "16/9", overflow: "hidden" },
-  detailImg: { width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 },
+  detailHero: { position: "relative", background: "#111", width: "100%", height: 500, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" },
+  detailImg: { width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" },
   detailNav: { position: "absolute", top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", color: "#fff", border: "none", borderRadius: "50%", width: 44, height: 44, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
   detailContent: { maxWidth: 1000, margin: "0 auto", padding: "32px 24px" },
   detailTitle: { fontSize: 30, fontWeight: 300, color: colors.primary, marginBottom: 8 },
