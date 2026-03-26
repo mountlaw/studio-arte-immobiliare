@@ -198,6 +198,7 @@ const INITIAL_PROPERTIES = [
 
 const INITIAL_USERS = [
   { id: 1, nome: "Andrea", email: "andrea.edmusic@gmail.com", ruolo: "admin", password: "StudioArte2024!" },
+  { id: 2, nome: "Admin", email: "admin@studioarte.com", ruolo: "admin", password: "StudioArte2024!" },
 ];
 
 // --- UTILITY ---
@@ -340,10 +341,11 @@ const styles = {
   cardDetailValue: { fontWeight: 600, color: colors.text },
 
   // Property Detail
-  detailHero: { position: "relative", background: "#111", width: "100%", height: 500, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" },
-  detailImg: { width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" },
-  detailNav: { position: "absolute", top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", color: "#fff", border: "none", borderRadius: "50%", width: 44, height: 44, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
-  detailContent: { maxWidth: 1000, margin: "0 auto", padding: "32px 24px" },
+  detailGallery: { maxWidth: 900, margin: "32px auto 0", padding: "0 24px" },
+  detailMainImg: { position: "relative", background: "#f5f5f5", borderRadius: 12, overflow: "hidden", marginBottom: 12 },
+  detailImg: { width: "100%", height: "auto", maxHeight: 520, objectFit: "contain", display: "block", margin: "0 auto" },
+  detailNav: { position: "absolute", top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.45)", color: "#fff", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" },
+  detailContent: { maxWidth: 900, margin: "0 auto", padding: "32px 24px" },
   detailTitle: { fontSize: 30, fontWeight: 300, color: colors.primary, marginBottom: 8 },
   detailPrice: { fontSize: 32, fontWeight: 700, color: colors.accent },
   detailGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 16, margin: "24px 0", padding: 20, background: colors.white, borderRadius: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" },
@@ -780,23 +782,27 @@ function PropertyDetail({ property, setPage }) {
   const imgs = property.immagini || [];
   return (
     <div>
-      <div style={styles.detailHero}>
-        {imgs.length > 0 && <img src={imgs[imgIndex]} alt="" style={styles.detailImg} />}
-        {imgs.length > 1 && (
-          <>
-            <button style={{ ...styles.detailNav, left: 16 }} onClick={() => setImgIndex((imgIndex - 1 + imgs.length) % imgs.length)}><IconChevronLeft /></button>
-            <button style={{ ...styles.detailNav, right: 16 }} onClick={() => setImgIndex((imgIndex + 1) % imgs.length)}><IconChevronRight /></button>
-          </>
-        )}
-        <div style={{ position: "absolute", bottom: 16, right: 16, background: "rgba(0,0,0,0.6)", color: "#fff", padding: "6px 12px", borderRadius: 6, fontSize: 13 }}>
-          {imgIndex + 1} / {imgs.length}
-        </div>
-      </div>
-      {imgs.length > 1 && (
-        <div style={{ ...styles.thumbRow, justifyContent: "center", padding: "12px 24px", background: "#111" }}>
-          {imgs.map((img, i) => (
-            <img key={i} src={img} alt="" style={{ ...styles.thumb, ...(i === imgIndex ? styles.thumbActive : {}) }} onClick={() => setImgIndex(i)} />
-          ))}
+      {imgs.length > 0 && (
+        <div style={styles.detailGallery}>
+          <div style={styles.detailMainImg}>
+            <img src={imgs[imgIndex]} alt={property.titolo} style={styles.detailImg} />
+            {imgs.length > 1 && (
+              <>
+                <button style={{ ...styles.detailNav, left: 12 }} onClick={() => setImgIndex((imgIndex - 1 + imgs.length) % imgs.length)}><IconChevronLeft /></button>
+                <button style={{ ...styles.detailNav, right: 12 }} onClick={() => setImgIndex((imgIndex + 1) % imgs.length)}><IconChevronRight /></button>
+              </>
+            )}
+            <div style={{ position: "absolute", bottom: 12, right: 12, background: "rgba(0,0,0,0.55)", color: "#fff", padding: "5px 10px", borderRadius: 6, fontSize: 12 }}>
+              {imgIndex + 1} / {imgs.length}
+            </div>
+          </div>
+          {imgs.length > 1 && (
+            <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+              {imgs.map((img, i) => (
+                <img key={i} src={img} alt="" style={{ width: 72, height: 54, objectFit: "cover", borderRadius: 8, cursor: "pointer", opacity: i === imgIndex ? 1 : 0.5, border: i === imgIndex ? `2px solid ${colors.accent}` : "2px solid transparent", transition: "opacity 0.2s, border-color 0.2s" }} onClick={() => setImgIndex(i)} />
+              ))}
+            </div>
+          )}
         </div>
       )}
       <div style={styles.detailContent}>
