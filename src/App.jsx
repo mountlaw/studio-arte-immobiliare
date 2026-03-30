@@ -29,18 +29,32 @@ async function dbFetchProperties() {
   return res.json();
 }
 
+function sanitizePropertyForDb(prop) {
+  const { id, data_inserimento, ...data } = prop;
+  return {
+    ...data,
+    locali: Number(data.locali) || 0,
+    camere: Number(data.camere) || 0,
+    bagni: Number(data.bagni) || 0,
+    mq: Number(data.mq) || 0,
+    prezzo: Number(data.prezzo) || 0,
+    anno: Number(data.anno) || 2000,
+    video_url: data.video_url || "",
+  };
+}
+
 async function dbInsertProperty(prop) {
-  const { id, ...data } = prop;
+  const data = sanitizePropertyForDb(prop);
   const res = await fetch(`${DB_URL}/immobili`, { method: "POST", headers: DB_HEADERS, body: JSON.stringify(data) });
-  if (!res.ok) throw new Error("Errore nel salvataggio");
+  if (!res.ok) { const err = await res.text(); throw new Error("Errore nel salvataggio: " + err); }
   const rows = await res.json();
   return rows[0];
 }
 
 async function dbUpdateProperty(id, prop) {
-  const { id: _, ...data } = prop;
+  const data = sanitizePropertyForDb(prop);
   const res = await fetch(`${DB_URL}/immobili?id=eq.${id}`, { method: "PATCH", headers: DB_HEADERS, body: JSON.stringify(data) });
-  if (!res.ok) throw new Error("Errore nell'aggiornamento");
+  if (!res.ok) { const err = await res.text(); throw new Error("Errore nell'aggiornamento: " + err); }
   const rows = await res.json();
   return rows[0];
 }
@@ -304,6 +318,12 @@ const IconDashboard = () => (
 );
 const IconEye = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+);
+const IconStar = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+);
+const IconSettings = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
 );
 
 // --- STYLES ---
@@ -841,6 +861,23 @@ function PropertyDetail({ property, setPage }) {
           )}
         </div>
       )}
+      {property.video_url && (
+        <div style={{ maxWidth: 900, margin: "24px auto 0", padding: "0 24px" }}>
+          <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, borderRadius: 12, overflow: "hidden", background: "#000" }}>
+            {property.video_url.includes("youtube.com") || property.video_url.includes("youtu.be") ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${property.video_url.includes("youtu.be") ? property.video_url.split("/").pop().split("?")[0] : new URLSearchParams(new URL(property.video_url).search).get("v")}`}
+                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="Video immobile"
+              />
+            ) : (
+              <video src={property.video_url} controls style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }} />
+            )}
+          </div>
+        </div>
+      )}
       <div style={styles.detailContent}>
         <button style={{ ...styles.navLink, color: colors.primary, padding: "8px 0", marginBottom: 16, display: "flex", alignItems: "center", gap: 6 }} onClick={() => setPage({ name: property.tipo === "vendita" ? "vendite" : "affitti" })}>
           <IconArrowLeft /> Torna agli annunci
@@ -923,7 +960,7 @@ function ListingsPage({ properties, tipo, setPage }) {
   );
 }
 
-function HomePage({ properties, setPage, filters, setFilters, isMobile, heroImage }) {
+function HomePage({ properties, setPage, filters, setFilters, isMobile, heroImage, reviews }) {
   const evidenza = properties.filter((p) => p.evidenza && p.pubblicato);
   return (
     <div>
@@ -997,6 +1034,24 @@ function HomePage({ properties, setPage, filters, setFilters, isMobile, heroImag
         </div>
       </div>
 
+      {/* Recensioni */}
+      {reviews && reviews.length > 0 && (
+        <div style={{ ...styles.section, paddingTop: 16, paddingBottom: 48 }}>
+          <h2 className="section-title-responsive" style={styles.sectionTitle}>Cosa Dicono i Nostri Clienti</h2>
+          <div style={styles.sectionAccent} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginTop: 8 }}>
+            {reviews.map((r, i) => (
+              <div key={i} style={{ background: colors.white, borderRadius: 12, padding: 28, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", position: "relative" }}>
+                <div style={{ fontSize: 48, color: colors.accent, opacity: 0.2, position: "absolute", top: 12, left: 20, fontFamily: "Georgia, serif", lineHeight: 1 }}>"</div>
+                <div style={{ display: "flex", gap: 2, marginBottom: 12 }}>{Array.from({length: 5}, (_, n) => <span key={n} style={{ color: n < r.stelle ? colors.accent : colors.border, fontSize: 16 }}>&#9733;</span>)}</div>
+                <p style={{ fontSize: 14, lineHeight: 1.7, color: colors.text, margin: "0 0 16px", fontStyle: "italic" }}>{r.testo}</p>
+                <div style={{ fontSize: 14, fontWeight: 600, color: colors.primary }}>{r.nome}</div>
+                {r.citta && <div style={{ fontSize: 12, color: colors.textLight }}>{r.citta}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {/* CTA Valutazione */}
       <div style={{ ...styles.section, paddingTop: 48 }}>
         <div style={styles.ctaBanner}>
@@ -1009,7 +1064,7 @@ function HomePage({ properties, setPage, filters, setFilters, isMobile, heroImag
   );
 }
 
-function ChiSiamoPage({ setPage }) {
+function ChiSiamoPage({ setPage, socialLinks }) {
   return (
     <div>
       {/* Intro */}
@@ -1200,7 +1255,7 @@ function ValutazionePage({ isMobile }) {
   );
 }
 
-function ContattiPage({ isMobile }) {
+function ContattiPage({ isMobile, socialLinks }) {
   const [contactForm, setContactForm] = useState({ nome: "", email: "", telefono: "", messaggio: "" });
   const [contactSent, setContactSent] = useState(false);
   const [contactError, setContactError] = useState("");
@@ -1248,7 +1303,7 @@ function ContattiPage({ isMobile }) {
             </p>
           </div>
           <div style={{ marginTop: 24 }}>
-            <SocialIcons color={colors.accent} />
+            <SocialIcons color={colors.accent} socialLinks={socialLinks} />
           </div>
         </div>
         <div>
@@ -1309,24 +1364,29 @@ function IconTiktok() {
   );
 }
 
-// Social links data (modifiable from admin in production)
-const SOCIAL_LINKS = {
+// Social links data - defaults (overridden by state in App)
+const DEFAULT_SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/studioarteimmobiliare/",
   youtube: "https://www.youtube.com/@studioarteimmobiliare",
   tiktok: "https://www.tiktok.com/@studioarteimmobiliare",
+  facebook: "",
+  linkedin: "",
 };
 
-function SocialIcons({ color = "rgba(255,255,255,0.7)", size = "20" }) {
+function SocialIcons({ color = "rgba(255,255,255,0.7)", socialLinks }) {
+  const links = socialLinks || DEFAULT_SOCIAL_LINKS;
   return (
     <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-      <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" style={{ color, transition: "opacity 0.2s" }} title="Instagram"><IconInstagram /></a>
-      <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" style={{ color, transition: "opacity 0.2s" }} title="YouTube"><IconYoutube /></a>
-      <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noopener noreferrer" style={{ color, transition: "opacity 0.2s" }} title="TikTok"><IconTiktok /></a>
+      {links.instagram && <a href={links.instagram} target="_blank" rel="noopener noreferrer" style={{ color, transition: "opacity 0.2s" }} title="Instagram"><IconInstagram /></a>}
+      {links.youtube && <a href={links.youtube} target="_blank" rel="noopener noreferrer" style={{ color, transition: "opacity 0.2s" }} title="YouTube"><IconYoutube /></a>}
+      {links.tiktok && <a href={links.tiktok} target="_blank" rel="noopener noreferrer" style={{ color, transition: "opacity 0.2s" }} title="TikTok"><IconTiktok /></a>}
+      {links.facebook && <a href={links.facebook} target="_blank" rel="noopener noreferrer" style={{ color, transition: "opacity 0.2s" }} title="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>}
+      {links.linkedin && <a href={links.linkedin} target="_blank" rel="noopener noreferrer" style={{ color, transition: "opacity 0.2s" }} title="LinkedIn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>}
     </div>
   );
 }
 
-function Footer({ setPage }) {
+function Footer({ setPage, socialLinks }) {
   return (
     <footer style={styles.footer}>
       <div className="footer-grid-responsive" style={styles.footerInner}>
@@ -1337,7 +1397,7 @@ function Footer({ setPage }) {
             Ogni immobile ha una storia. Noi la valorizziamo.
           </p>
           <div style={{ marginTop: 16 }}>
-            <SocialIcons color={colors.accent} />
+            <SocialIcons color={colors.accent} socialLinks={socialLinks} />
           </div>
         </div>
         <div>
@@ -1435,6 +1495,8 @@ function AdminSidebar({ adminPage, setAdminPage, currentUser, setPage, setCurren
   ];
   if (currentUser?.ruolo === "admin") {
     links.push({ name: "utenti", label: "Utenti", icon: <IconUsers /> });
+    links.push({ name: "recensioni", label: "Recensioni", icon: <IconStar /> });
+    links.push({ name: "impostazioni", label: "Impostazioni", icon: <IconSettings /> });
   }
   return (
     <div className="admin-sidebar-responsive" style={styles.adminSidebar}>
@@ -1591,26 +1653,29 @@ const EMPTY_PROPERTY = {
   titolo: "",
   tipo: "vendita",
   categoria: "Appartamento",
-  locali: "",
-  camere: "",
-  bagni: "",
-  mq: "",
-  prezzo: "",
-  citta: "Milano",
+  locali: 0,
+  camere: 0,
+  bagni: 0,
+  mq: 0,
+  prezzo: 0,
+  citta: "",
   zona: "",
   indirizzo: "",
   piano: "",
-  anno: "",
+  anno: 2000,
   stato: "Buono",
   classe_energetica: "G",
   riscaldamento: "Autonomo",
   descrizione: "",
   caratteristiche: [],
   immagini: [],
+  video_url: "",
   evidenza: false,
   pubblicato: false,
   data_inserimento: new Date().toISOString().split("T")[0],
 };
+
+const CLASSE_ENERGETICA_OPTIONS = ["A4", "A3", "A2", "A1", "A", "B", "C", "D", "E", "F", "G", "In corso", "Non disponibile", "Esente"];
 
 function PropertyForm({ property, onSave, onCancel }) {
   const [form, setForm] = useState(property || { ...EMPTY_PROPERTY });
@@ -1719,7 +1784,7 @@ function PropertyForm({ property, onSave, onCancel }) {
         <div style={styles.formGroup}>
           <label style={styles.formLabel}>Classe Energetica</label>
           <select style={styles.formSelect} value={form.classe_energetica} onChange={(e) => update("classe_energetica", e.target.value)}>
-            {["A4", "A3", "A2", "A1", "A", "B", "C", "D", "E", "F", "G"].map((c) => <option key={c}>{c}</option>)}
+            {CLASSE_ENERGETICA_OPTIONS.map((c) => <option key={c}>{c}</option>)}
           </select>
         </div>
         <div style={styles.formGroup}>
@@ -1758,8 +1823,12 @@ function PropertyForm({ property, onSave, onCancel }) {
         <label style={styles.formLabel}>Immagini</label>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
           {form.immagini.map((img, i) => (
-            <div key={i} style={{ position: "relative" }}>
+            <div key={i} style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
               <img src={img} alt="" style={{ width: 100, height: 75, objectFit: "cover", borderRadius: 6 }} />
+              <div style={{ display: "flex", gap: 2 }}>
+                {i > 0 && <button style={{ background: colors.primary, color: "#fff", border: "none", borderRadius: 4, width: 22, height: 18, fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => { const imgs = [...form.immagini]; [imgs[i-1], imgs[i]] = [imgs[i], imgs[i-1]]; update("immagini", imgs); }} title="Sposta a sinistra">&#9664;</button>}
+                {i < form.immagini.length - 1 && <button style={{ background: colors.primary, color: "#fff", border: "none", borderRadius: 4, width: 22, height: 18, fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => { const imgs = [...form.immagini]; [imgs[i], imgs[i+1]] = [imgs[i+1], imgs[i]]; update("immagini", imgs); }} title="Sposta a destra">&#9654;</button>}
+              </div>
               <button style={{ position: "absolute", top: -4, right: -4, background: colors.danger, color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => update("immagini", form.immagini.filter((_, j) => j !== i))}>x</button>
             </div>
           ))}
@@ -1785,6 +1854,13 @@ function PropertyForm({ property, onSave, onCancel }) {
         {uploadSuccess && <div style={{ background: "#f0fdf4", color: "#16a34a", padding: "8px 12px", borderRadius: 8, fontSize: 13, marginTop: 8 }}>{uploadSuccess}</div>}
         <div style={{ fontSize: 12, color: colors.textLight, marginTop: 4 }}>
           Le foto vengono caricate in cloud. Puoi selezionare piu' foto alla volta. Formati: JPG, PNG, WebP.
+        </div>
+      </div>
+      <div style={styles.formGroup}>
+        <label style={styles.formLabel}>Video (URL YouTube o link diretto)</label>
+        <input style={styles.formInput} value={form.video_url || ""} onChange={(e) => update("video_url", e.target.value)} placeholder="https://www.youtube.com/watch?v=... oppure link diretto al video" />
+        <div style={{ fontSize: 12, color: colors.textLight, marginTop: 4 }}>
+          Incolla il link di un video YouTube o di un video caricato online. Verra' mostrato nella scheda dell'immobile.
         </div>
       </div>
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 8, marginBottom: 24 }}>
@@ -2001,7 +2077,129 @@ function AdminUtenti({ users, setUsers }) {
   );
 }
 
-function AdminPanel({ properties, setProperties, users, setUsers, currentUser, setCurrentUser, setPage, heroImage, setHeroImage }) {
+function AdminRecensioni({ reviews, setReviews }) {
+  const [form, setForm] = useState({ nome: "", testo: "", stelle: 5, citta: "" });
+  const [editing, setEditing] = useState(null);
+
+  const handleSave = () => {
+    if (!form.nome.trim() || !form.testo.trim()) { alert("Inserisci nome e testo della recensione"); return; }
+    if (editing !== null) {
+      setReviews(reviews.map((r, i) => i === editing ? { ...form } : r));
+    } else {
+      setReviews([...reviews, { ...form }]);
+    }
+    setForm({ nome: "", testo: "", stelle: 5, citta: "" });
+    setEditing(null);
+  };
+
+  const handleDelete = (index) => {
+    if (confirm("Eliminare questa recensione?")) {
+      setReviews(reviews.filter((_, i) => i !== index));
+    }
+  };
+
+  return (
+    <div>
+      <h2 style={styles.adminTitle}>Gestione Recensioni</h2>
+      <div style={styles.adminCard}>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{editing !== null ? "Modifica Recensione" : "Aggiungi Recensione"}</h3>
+        <div className="form-row-responsive" style={styles.formRow}>
+          <div style={styles.formGroup}>
+            <label style={styles.formLabel}>Nome cliente</label>
+            <input style={styles.formInput} value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Mario Rossi" />
+          </div>
+          <div style={styles.formGroup}>
+            <label style={styles.formLabel}>Citta'</label>
+            <input style={styles.formInput} value={form.citta} onChange={(e) => setForm({ ...form, citta: e.target.value })} placeholder="Milano" />
+          </div>
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>Stelle (1-5)</label>
+          <div style={{ display: "flex", gap: 4 }}>
+            {[1,2,3,4,5].map(n => (
+              <button key={n} onClick={() => setForm({ ...form, stelle: n })} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 24, color: n <= form.stelle ? colors.accent : colors.border }}>&#9733;</button>
+            ))}
+          </div>
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>Testo recensione</label>
+          <textarea style={{ ...styles.formTextarea, minHeight: 100 }} value={form.testo} onChange={(e) => setForm({ ...form, testo: e.target.value })} placeholder="Scrivi la recensione del cliente..." />
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button style={styles.formBtn} onClick={handleSave}>{editing !== null ? "Aggiorna" : "Aggiungi"}</button>
+          {editing !== null && <button style={styles.formBtnSecondary} onClick={() => { setEditing(null); setForm({ nome: "", testo: "", stelle: 5, citta: "" }); }}>Annulla</button>}
+        </div>
+      </div>
+      {reviews.length > 0 && (
+        <div style={{ ...styles.adminCard, marginTop: 16 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Recensioni inserite ({reviews.length})</h3>
+          {reviews.map((r, i) => (
+            <div key={i} style={{ padding: "16px 0", borderBottom: i < reviews.length - 1 ? `1px solid ${colors.border}` : "none", display: "flex", justifyContent: "space-between", alignItems: "start", gap: 16 }}>
+              <div>
+                <div style={{ display: "flex", gap: 2, marginBottom: 4 }}>{Array.from({length: 5}, (_, n) => <span key={n} style={{ color: n < r.stelle ? colors.accent : colors.border }}>&#9733;</span>)}</div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{r.nome}{r.citta ? ` - ${r.citta}` : ""}</div>
+                <div style={{ fontSize: 14, color: colors.textLight, marginTop: 4 }}>{r.testo}</div>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                <button style={{ ...styles.adminBtnSmall, background: "#e3f2fd", color: "#1565c0" }} onClick={() => { setForm(r); setEditing(i); }}>
+                  <IconEdit /> Modifica
+                </button>
+                <button style={{ ...styles.adminBtnSmall, background: "#fef2f2", color: colors.danger }} onClick={() => handleDelete(i)}>
+                  <IconTrash />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AdminImpostazioni({ socialLinks, setSocialLinks }) {
+  const [form, setForm] = useState({ ...socialLinks });
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    setSocialLinks({ ...form });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  return (
+    <div>
+      <h2 style={styles.adminTitle}>Impostazioni</h2>
+      <div style={styles.adminCard}>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Link Social</h3>
+        <p style={{ fontSize: 13, color: colors.textLight, marginBottom: 16 }}>Inserisci i link dei tuoi profili social. Lascia vuoto se non hai un profilo su quella piattaforma.</p>
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>Instagram</label>
+          <input style={styles.formInput} value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value })} placeholder="https://www.instagram.com/..." />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>YouTube</label>
+          <input style={styles.formInput} value={form.youtube} onChange={(e) => setForm({ ...form, youtube: e.target.value })} placeholder="https://www.youtube.com/..." />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>TikTok</label>
+          <input style={styles.formInput} value={form.tiktok} onChange={(e) => setForm({ ...form, tiktok: e.target.value })} placeholder="https://www.tiktok.com/..." />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>Facebook</label>
+          <input style={styles.formInput} value={form.facebook} onChange={(e) => setForm({ ...form, facebook: e.target.value })} placeholder="https://www.facebook.com/..." />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>LinkedIn</label>
+          <input style={styles.formInput} value={form.linkedin} onChange={(e) => setForm({ ...form, linkedin: e.target.value })} placeholder="https://www.linkedin.com/..." />
+        </div>
+        <button style={styles.formBtn} onClick={handleSave}>Salva Impostazioni</button>
+        {saved && <span style={{ marginLeft: 12, color: colors.success, fontSize: 14 }}>Salvato!</span>}
+      </div>
+    </div>
+  );
+}
+
+function AdminPanel({ properties, setProperties, users, setUsers, currentUser, setCurrentUser, setPage, heroImage, setHeroImage, socialLinks, setSocialLinks, reviews, setReviews }) {
   const [adminPage, setAdminPage] = useState("dashboard");
   return (
     <div className="admin-layout-responsive" style={styles.adminLayout}>
@@ -2010,6 +2208,8 @@ function AdminPanel({ properties, setProperties, users, setUsers, currentUser, s
         {adminPage === "dashboard" && <AdminDashboard properties={properties} heroImage={heroImage} setHeroImage={setHeroImage} />}
         {adminPage === "immobili" && <AdminImmobili properties={properties} setProperties={setProperties} />}
         {adminPage === "utenti" && <AdminUtenti users={users} setUsers={setUsers} />}
+        {adminPage === "recensioni" && <AdminRecensioni reviews={reviews} setReviews={setReviews} />}
+        {adminPage === "impostazioni" && <AdminImpostazioni socialLinks={socialLinks} setSocialLinks={setSocialLinks} />}
       </div>
     </div>
   );
@@ -2113,7 +2313,17 @@ export default function App() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [filters, setFilters] = useState({ tipo: "", categoria: "", citta: "" });
   const [heroImage, setHeroImage] = useState("");
+  const [socialLinks, setSocialLinks] = useState(() => {
+    try { const saved = localStorage.getItem("sai_social_links"); return saved ? JSON.parse(saved) : DEFAULT_SOCIAL_LINKS; } catch { return DEFAULT_SOCIAL_LINKS; }
+  });
+  const [reviews, setReviews] = useState(() => {
+    try { const saved = localStorage.getItem("sai_reviews"); return saved ? JSON.parse(saved) : []; } catch { return []; }
+  });
   const isMobile = useIsMobile();
+
+  // Persist social links and reviews
+  useEffect(() => { localStorage.setItem("sai_social_links", JSON.stringify(socialLinks)); }, [socialLinks]);
+  useEffect(() => { localStorage.setItem("sai_reviews", JSON.stringify(reviews)); }, [reviews]);
 
   // Carica immobili dal database
   useEffect(() => {
@@ -2141,9 +2351,9 @@ export default function App() {
   if (page.name === "admin-login") {
     return <AdminLogin setPage={setPage} users={users} setCurrentUser={setCurrentUser} />;
   }
-  if (page.name === "admin-dashboard" || page.name === "admin-immobili" || page.name === "admin-utenti") {
+  if (page.name === "admin-dashboard" || page.name === "admin-immobili" || page.name === "admin-utenti" || page.name === "admin-recensioni" || page.name === "admin-impostazioni") {
     if (!currentUser) return <AdminLogin setPage={setPage} users={users} setCurrentUser={setCurrentUser} />;
-    return <AdminPanel properties={properties} setProperties={setProperties} users={users} setUsers={setUsers} currentUser={currentUser} setCurrentUser={setCurrentUser} setPage={setPage} heroImage={heroImage} setHeroImage={setHeroImage} />;
+    return <AdminPanel properties={properties} setProperties={setProperties} users={users} setUsers={setUsers} currentUser={currentUser} setCurrentUser={setCurrentUser} setPage={setPage} heroImage={heroImage} setHeroImage={setHeroImage} socialLinks={socialLinks} setSocialLinks={setSocialLinks} reviews={reviews} setReviews={setReviews} />;
   }
 
   // Property detail
@@ -2155,7 +2365,7 @@ export default function App() {
         <Navbar page={page} setPage={setPage} showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} isMobile={isMobile} />
         {showMobileMenu && <MobileMenu page={page} setPage={setPage} onClose={() => setShowMobileMenu(false)} />}
         <PropertyDetail property={prop} setPage={setPage} isMobile={isMobile} />
-        <Footer setPage={setPage} isMobile={isMobile} />
+        <Footer setPage={setPage} isMobile={isMobile} socialLinks={socialLinks} />
       </div>
     );
   }
@@ -2164,21 +2374,21 @@ export default function App() {
   const renderPage = () => {
     switch (page.name) {
       case "home":
-        return <HomePage properties={properties} setPage={setPage} filters={filters} setFilters={setFilters} isMobile={isMobile} heroImage={heroImage} />;
+        return <HomePage properties={properties} setPage={setPage} filters={filters} setFilters={setFilters} isMobile={isMobile} heroImage={heroImage} reviews={reviews} />;
       case "vendite":
         return <ListingsPage properties={properties} tipo="vendita" setPage={setPage} isMobile={isMobile} />;
       case "affitti":
         return <ListingsPage properties={properties} tipo="affitto" setPage={setPage} isMobile={isMobile} />;
       case "chi-siamo":
-        return <ChiSiamoPage isMobile={isMobile} setPage={setPage} />;
+        return <ChiSiamoPage isMobile={isMobile} setPage={setPage} socialLinks={socialLinks} />;
       case "valutazione":
         return <ValutazionePage isMobile={isMobile} />;
       case "contatti":
-        return <ContattiPage isMobile={isMobile} />;
+        return <ContattiPage isMobile={isMobile} socialLinks={socialLinks} />;
       case "privacy":
         return <PrivacyPolicyPage />;
       default:
-        return <HomePage properties={properties} setPage={setPage} filters={filters} setFilters={setFilters} isMobile={isMobile} heroImage={heroImage} />;
+        return <HomePage properties={properties} setPage={setPage} filters={filters} setFilters={setFilters} isMobile={isMobile} heroImage={heroImage} reviews={reviews} />;
     }
   };
 
@@ -2223,7 +2433,7 @@ export default function App() {
       <Navbar page={page} setPage={setPage} showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} isMobile={isMobile} />
       {showMobileMenu && <MobileMenu page={page} setPage={setPage} onClose={() => setShowMobileMenu(false)} />}
       {renderPage()}
-      <Footer setPage={setPage} isMobile={isMobile} />
+      <Footer setPage={setPage} isMobile={isMobile} socialLinks={socialLinks} />
       <CookieBanner />
     </div>
   );
