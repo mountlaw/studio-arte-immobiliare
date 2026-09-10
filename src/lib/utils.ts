@@ -116,7 +116,7 @@ export function cn(...parts: Array<string | false | null | undefined>) {
 export function ogImageFor(siteUrl: string, p: Pick<Immobile, "immagini">) {
   const first = p.immagini?.[0];
   if (!first) return `${siteUrl}/og-default.jpg`;
-  return `${siteUrl}/_next/image?url=${encodeURIComponent(first)}&w=1200&q=75`;
+  return `${siteUrl}/_next/image?url=${encodeURIComponent(first)}&w=1280&q=75`;
 }
 
 export function toNumber(v: unknown, fallback = 0) {

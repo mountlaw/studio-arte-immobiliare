@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       siteName: AZIENDA.nome,
       locale: "it_IT",
-      images: [{ url: image, width: 1200, height: 800, alt: p.titolo }],
+      images: [{ url: image, width: 1280, height: 853, alt: p.titolo }],
     },
     twitter: { card: "summary_large_image", title, description, images: [image] },
   };
