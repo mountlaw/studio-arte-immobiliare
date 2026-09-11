@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { STORAGE_PUBLIC_URL } from "@/lib/supabase/env";
+import { OLD_STORAGE_PUBLIC_URL, STORAGE_PUBLIC_URL } from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const u = request.nextUrl.searchParams.get("u") || "";
   const w = Math.min(2400, Math.max(320, Number(request.nextUrl.searchParams.get("w")) || 1920));
-  if (!u.startsWith(STORAGE_PUBLIC_URL)) return new NextResponse("URL non consentito", { status: 400 });
+  if (!u.startsWith(STORAGE_PUBLIC_URL) && !u.startsWith(OLD_STORAGE_PUBLIC_URL)) return new NextResponse("URL non consentito", { status: 400 });
 
   const upstream = await fetch(u, { headers: { Accept: "image/*" } });
   if (!upstream.ok) return new NextResponse("Foto non trovata", { status: 404 });

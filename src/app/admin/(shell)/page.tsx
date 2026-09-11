@@ -5,6 +5,7 @@ import { IconPlus } from "@/components/ui/Icons";
 import { getTuttiImmobili } from "@/lib/data/immobili";
 import { getRichieste } from "@/lib/data/richieste";
 import { supabaseServer } from "@/lib/supabase/server";
+import { OLD_STORAGE_PUBLIC_URL } from "@/lib/supabase/env";
 import { formatDate, formatPrice, immobileHref } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,7 @@ export default async function DashboardPage() {
   const disponibili = pubblicati.filter((p) => p.disponibile);
   const bozze = immobili.filter((p) => !p.pubblicato);
   const nonLette = richieste.filter((r) => !r.letta);
+  const fotoVecchioArchivio = immobili.reduce((n, p) => n + p.immagini.filter((u) => u.startsWith(OLD_STORAGE_PUBLIC_URL)).length, 0);
 
   return (
     <>
@@ -28,6 +30,17 @@ export default async function DashboardPage() {
           </Link>
         }
       />
+
+      {fotoVecchioArchivio > 0 && (
+        <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-gold/40 bg-gold/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-[14px] text-ink">
+            <strong>{fotoVecchioArchivio} foto</strong> sono ancora nel vecchio archivio: vanno copiate in quello nuovo (bastano un paio di minuti).
+          </div>
+          <Link href="/admin/migrazione" className="btn btn-primary btn-sm">
+            Copia le foto ora
+          </Link>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Annunci online" value={disponibili.length} href="/admin/immobili" />
