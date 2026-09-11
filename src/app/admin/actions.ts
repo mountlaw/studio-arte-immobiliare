@@ -345,3 +345,111 @@ export async function sincronizzaPortaliOra(): Promise<ActionResult<{ inviati: n
     return fail(e);
   }
 }
+
+// ------------------------------------------------------------------
+// MIGRAZIONE FOTO dal vecchio progetto Supabase (una tantum)
+// ------------------------------------------------------------------
+import { OLD_STORAGE_PUBLIC_URL, STORAGE_BUCKET, STORAGE_PUBLIC_URL } from "@/lib/supabase/env";
+
+export interface EsitoMigrazioneFoto {
+  copiate: number;
+  rimaste: number;
+  errori: string[];
+}
+
+/** Conta le foto ancora ospitate sul vecchio progetto. */
+export async function contaFotoVecchioProgetto(): Promise<ActionResult<number>> {
+  try {
+    await requireAdmin();
+    const supabase = await supabaseServer();
+    const { data, error } = await supabase.from("immobili").select("immagini");
+    if (error) throw new Error(error.message);
+    const { data: imp } = await supabase.from("impostazioni").select("valore").eq("chiave", "hero_image").maybeSingle();
+    let n = 0;
+    for (const r of data ?? []) for (const u of (r as { immagini: string[] | null }).immagini ?? []) if (u.startsWith(OLD_STORAGE_PUBLIC_URL)) n++;
+    if (imp && String((imp as { valore: string | null }).valore || "").startsWith(OLD_STORAGE_PUBLIC_URL)) n++;
+    return { ok: true, data: n };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/**
+ * Copia un lotto di foto dal vecchio storage a quello nuovo e aggiorna gli URL.
+ * Usa la sessione dell'admin loggato (policy foto_upload_admin). Idempotente:
+ * si puo' rilanciare finche' "rimaste" arriva a zero.
+ */
+export async function copiaFotoVecchioProgetto(limite = 10): Promise<ActionResult<EsitoMigrazioneFoto>> {
+  try {
+    await requireAdmin();
+    const supabase = await supabaseServer();
+    const errori: string[] = [];
+    let copiate = 0;
+    let rimaste = 0;
+
+    const copia = async (url: string): Promise<string | null> => {
+      const path = url.slice(OLD_STORAGE_PUBLIC_URL.length + 1); // es. immobili/123.jpg
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`download ${res.status}`);
+      const contentType = res.headers.get("content-type") || "application/octet-stream";
+      const buf = Buffer.from(await res.arrayBuffer());
+      const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(path, buf, { contentType, cacheControl: "31536000", upsert: true });
+      if (error) throw new Error(error.message);
+      return `${STORAGE_PUBLIC_URL}/${path}`;
+    };
+
+    const { data, error } = await supabase.from("immobili").select("id, immagini").order("id");
+    if (error) throw new Error(error.message);
+    for (const r of (data ?? []) as Array<{ id: number; immagini: string[] | null }>) {
+      const imgs = r.immagini ?? [];
+      let cambiato = false;
+      const nuove = [...imgs];
+      for (let i = 0; i < imgs.length; i++) {
+        const u = imgs[i];
+        if (!u.startsWith(OLD_STORAGE_PUBLIC_URL)) continue;
+        if (copiate >= limite) {
+          rimaste++;
+          continue;
+        }
+        try {
+          const nuovo = await copia(u);
+          if (nuovo) {
+            nuove[i] = nuovo;
+            cambiato = true;
+            copiate++;
+          }
+        } catch (e) {
+          errori.push(`${u.split("/").pop()}: ${e instanceof Error ? e.message : "errore"}`);
+          rimaste++;
+        }
+      }
+      if (cambiato) {
+        const { error: upErr } = await supabase.from("immobili").update({ immagini: nuove }).eq("id", r.id);
+        if (upErr) errori.push(`immobile ${r.id}: ${upErr.message}`);
+      }
+    }
+
+    // Foto di copertina della homepage
+    const { data: imp } = await supabase.from("impostazioni").select("valore").eq("chiave", "hero_image").maybeSingle();
+    const hero = String((imp as { valore: string | null } | null)?.valore || "");
+    if (hero.startsWith(OLD_STORAGE_PUBLIC_URL)) {
+      if (copiate < limite) {
+        try {
+          const nuovo = await copia(hero);
+          if (nuovo) {
+            await supabase.from("impostazioni").update({ valore: nuovo }).eq("chiave", "hero_image");
+            copiate++;
+          }
+        } catch (e) {
+          errori.push(`copertina: ${e instanceof Error ? e.message : "errore"}`);
+          rimaste++;
+        }
+      } else rimaste++;
+    }
+
+    if (copiate > 0) revalidateSito();
+    return { ok: true, data: { copiate, rimaste, errori } };
+  } catch (e) {
+    return fail(e);
+  }
+}
