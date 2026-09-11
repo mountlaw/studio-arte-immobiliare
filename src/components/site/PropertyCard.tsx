@@ -25,7 +25,7 @@ export default function PropertyCard({ property, priority = false }: { property:
       href={href}
       className="group card flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-sand">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-sand">
         {cover ? (
           <Image
             src={cover}

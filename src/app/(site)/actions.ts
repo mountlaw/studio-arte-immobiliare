@@ -44,17 +44,15 @@ export async function inviaRichiesta(_prev: RichiestaState, formData: FormData):
   if (tipo === "valutazione" && !indirizzo_valutazione) return { ok: false, error: "Indica l'indirizzo dell'immobile da valutare." };
 
   const supabase = supabasePublic();
-  const { error } = await supabase.from("richieste").insert({
-    tipo,
-    nome,
-    email: email || null,
-    telefono: telefono || null,
-    messaggio: messaggio || null,
-    immobile_codice,
-    immobile_id,
-    indirizzo_valutazione,
-    dettagli: Object.keys(dettagli).length ? dettagli : null,
-  });
+  const base = { tipo, nome, email: email || null, telefono: telefono || null, messaggio: messaggio || null, immobile_codice, indirizzo_valutazione };
+  let { error } = await supabase.from("richieste").insert({ ...base, immobile_id, dettagli: Object.keys(dettagli).length ? dettagli : null });
+  if (error && /column|schema cache/i.test(error.message)) {
+    // Database non ancora migrato: salva senza le colonne nuove, mettendo i dettagli nel messaggio.
+    const extra = Object.entries(dettagli)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("\n");
+    ({ error } = await supabase.from("richieste").insert({ ...base, messaggio: [messaggio, extra].filter(Boolean).join("\n\n") || null }));
+  }
   if (error) {
     console.error("inviaRichiesta", error.message);
     return { ok: false, error: "Non siamo riusciti a inviare la richiesta. Riprova tra poco o chiamaci." };

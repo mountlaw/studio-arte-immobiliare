@@ -13,10 +13,19 @@ export default async function ShellLayout({ children }: { children: React.ReactN
     return (
       <div className="flex min-h-screen items-center justify-center px-4">
         <div className="card max-w-md p-8 text-center">
-          <h1 className="font-display text-3xl font-semibold text-navy">Account non autorizzato</h1>
+          <h1 className="font-display text-3xl font-semibold text-navy">{session.setupMancante ? "Database da aggiornare" : "Account non autorizzato"}</h1>
           <p className="mt-3 text-sm text-muted">
-            Sei entrato come <strong>{session.email}</strong>, ma questo indirizzo non è nella lista degli utenti autorizzati. Chiedi a un amministratore di
-            aggiungerlo da <em>Utenti</em>, poi accedi di nuovo.
+            {session.setupMancante ? (
+              <>
+                L&apos;area riservata nuova ha bisogno della migrazione del database: lancia lo script <code>supabase/02-migrazione-v2.sql</code> nel SQL Editor di
+                Supabase, poi ricarica questa pagina.
+              </>
+            ) : (
+              <>
+                Sei entrato come <strong>{session.email}</strong>, ma questo indirizzo non è nella lista degli utenti autorizzati. Chiedi a un amministratore di
+                aggiungerlo da <em>Utenti</em>, poi accedi di nuovo.
+              </>
+            )}
           </p>
           <form action={logout} className="mt-6">
             <button type="submit" className="btn btn-outline">
