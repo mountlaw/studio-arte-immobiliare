@@ -8,6 +8,18 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/env";
  * essere autenticato. Il controllo "e' davvero un admin?" lo fa il layout.
  */
 export async function proxy(request: NextRequest) {
+  // I link delle email di Supabase (conferma indirizzo, reset password) possono atterrare
+  // sulla home con ?code=...: li portiamo alla pagina che scambia il codice con la sessione.
+  const code = request.nextUrl.searchParams.get("code");
+  if (code && !request.nextUrl.pathname.startsWith("/auth/callback")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    url.search = "";
+    url.searchParams.set("code", code);
+    url.searchParams.set("next", request.nextUrl.searchParams.get("type") === "recovery" ? "/admin/reset" : "/admin");
+    return NextResponse.redirect(url);
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -45,5 +57,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/auth/:path*"],
+  matcher: ["/", "/admin/:path*", "/auth/:path*"],
 };
