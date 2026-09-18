@@ -9,8 +9,11 @@ type Mode = "login" | "primo" | "reset";
 
 const MESSAGGI: Record<string, string> = {
   link: "Il link non è più valido. Richiedi un nuovo link qui sotto.",
+  confermato: "Indirizzo confermato! Ora accedi con la tua email e la password che hai scelto.",
+  recovery: "Il link è stato aperto in un altro browser: richiedi di nuovo il link e aprilo dallo stesso dispositivo.",
   noadmin: "Questo account non è autorizzato. Chiedi a un amministratore di aggiungere la tua email.",
 };
+const INFO_KEYS = ["confermato"];
 
 export default function LoginForm({ next, errore }: { next: string; errore?: string }) {
   const router = useRouter();
@@ -19,8 +22,8 @@ export default function LoginForm({ next, errore }: { next: string; errore?: str
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState(errore ? MESSAGGI[errore] || "" : "");
-  const [info, setInfo] = useState("");
+  const [error, setError] = useState(errore && !INFO_KEYS.includes(errore) ? MESSAGGI[errore] || "" : "");
+  const [info, setInfo] = useState(errore && INFO_KEYS.includes(errore) ? MESSAGGI[errore] : "");
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -62,7 +65,7 @@ export default function LoginForm({ next, errore }: { next: string; errore?: str
           router.refresh();
           return;
         }
-        setInfo("Ti abbiamo inviato un'email: clicca il link per confermare l'indirizzo, poi torna qui e accedi.");
+        setInfo("Ti abbiamo inviato un'email (controlla anche lo spam): clicca il link per confermare l'indirizzo, poi torna qui e accedi con email e password.");
         setMode("login");
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${origin}/auth/callback?type=recovery&next=/admin/reset` });

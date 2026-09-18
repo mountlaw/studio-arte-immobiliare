@@ -14,6 +14,9 @@ export async function GET(request: NextRequest) {
     const supabase = await supabaseServer();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(`${origin}${next}`);
+    // Il link e' stato aperto in un browser diverso da quello in cui e' stata scelta la password:
+    // l'indirizzo e' comunque confermato, basta accedere con email e password.
+    return NextResponse.redirect(`${origin}/admin/login?errore=${type === "recovery" ? "recovery" : "confermato"}`);
   }
   return NextResponse.redirect(`${origin}/admin/login?errore=link`);
 }

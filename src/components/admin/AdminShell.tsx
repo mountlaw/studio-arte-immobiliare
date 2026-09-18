@@ -70,9 +70,9 @@ export default function AdminShell({ children, email, richiesteNonLette }: { chi
               <IconLogOut size={16} /> Esci
             </button>
           </form>
-          <div className="truncate px-3.5 pt-2 text-[11px] text-white/40" title={email}>
-            {email}
-          </div>
+          <Link href="/admin/password" className="block truncate px-3.5 pt-2 text-[11px] text-white/40 hover:text-white/80" title={`${email} · cambia password`}>
+            {email} · cambia password
+          </Link>
         </div>
       </aside>
 
