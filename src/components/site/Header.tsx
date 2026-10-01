@@ -87,6 +87,16 @@ export default function Header() {
               </Link>
             ))}
             <Link
+              href="/admin/login"
+              className={`rounded-full px-4 py-2 text-[14px] font-medium transition ${
+                solid
+                  ? "text-ink/60 hover:bg-navy/5 hover:text-navy"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              Login
+            </Link>
+            <Link
               href="/valuta-casa"
               className={`${solid ? "btn-primary" : "btn-gold"} btn btn-sm ml-2`}
             >
@@ -148,6 +158,12 @@ export default function Header() {
               {AZIENDA.indirizzo}, {AZIENDA.cap} {AZIENDA.citta} (
               {AZIENDA.provincia})
             </p>
+            <Link
+              href="/admin/login"
+              className="inline-flex rounded-full border border-white/25 px-5 py-2 text-sm font-medium text-white"
+            >
+              Login
+            </Link>
           </div>
         </div>
       </div>
