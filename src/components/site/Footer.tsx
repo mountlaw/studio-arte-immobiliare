@@ -94,8 +94,8 @@ export default function Footer({ impostazioni }: { impostazioni: Impostazioni })
             <Link href="/privacy" className="hover:text-white/80">
               Privacy &amp; Cookie
             </Link>
-            <Link href="/admin" className="hover:text-white/80">
-              Area riservata
+            <Link href="/admin/login" className="hover:text-white/80">
+              Login
             </Link>
           </div>
         </div>
